@@ -28,10 +28,6 @@ const Transactions = () => {
   });
   const fetchCalled = useRef(false);
 
-  // Get current month/year for budget categories
-  const currentMonth = new Date().getMonth() + 1;
-  const currentYear = new Date().getFullYear();
-
   useEffect(() => {
     if (!fetchCalled.current) {
       fetchCalled.current = true;
@@ -42,11 +38,8 @@ const Transactions = () => {
   const fetchAllData = async () => {
     setLoading(true);
     try {
-      // Fetch sequentially to avoid rate limiting
       await fetchTransactions();
-      await new Promise(resolve => setTimeout(resolve, 300));
       await fetchProjects();
-      await new Promise(resolve => setTimeout(resolve, 300));
       await fetchBudgetCategories();
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -55,14 +48,11 @@ const Transactions = () => {
     }
   };
 
-  // Fetch budget categories for the current month - FIXED: use getBudgets instead of getBudgetsWithSpent
   const fetchBudgetCategories = async () => {
     try {
       const response = await budgetService.getBudgets();
-      console.log('Budget categories response:', response.data);
       const categories = response.data?.budgets?.map(b => b.category) || [];
       setBudgetCategories(categories);
-      console.log('Available budget categories:', categories);
     } catch (error) {
       console.error('Failed to fetch budget categories:', error);
       setBudgetCategories([]);
@@ -72,7 +62,6 @@ const Transactions = () => {
   const fetchTransactions = async () => {
     try {
       const response = await transactionService.getTransactions(filters);
-      console.log('Transactions response:', response.data);
       setTransactions(response.data.transactions || []);
       setPagination({
         total: response.data.total || 0,
@@ -81,9 +70,7 @@ const Transactions = () => {
       });
     } catch (error) {
       console.error('Failed to fetch transactions:', error);
-      if (error.response?.status === 429) {
-        toast.error('Too many requests. Please wait a moment.');
-      } else {
+      if (error.response?.status !== 403) {
         toast.error('Failed to fetch transactions');
       }
     }
@@ -95,27 +82,19 @@ const Transactions = () => {
       setProjects(response.data.projects || []);
     } catch (error) {
       console.error('Failed to fetch projects:', error);
-      if (error.response?.status !== 429) {
-        toast.error('Failed to fetch projects');
-      }
     }
   };
 
   const handleCreateTransaction = async (transactionData) => {
     try {
-      console.log('Submitting transaction:', transactionData);
-      const response = await transactionService.createTransaction(transactionData);
-      console.log('Transaction created successfully:', response.data);
+      await transactionService.createTransaction(transactionData);
       toast.success('Transaction created successfully');
       setIsFormOpen(false);
-      // Reset fetch flag and refresh data
       fetchCalled.current = false;
       await fetchAllData();
-      return Promise.resolve();
     } catch (error) {
       console.error('Failed to create transaction:', error);
-      const errorMessage = error.response?.data?.message || 'Failed to create transaction';
-      toast.error(errorMessage);
+      toast.error(error.response?.data?.message || 'Failed to create transaction');
       throw error;
     }
   };
@@ -129,7 +108,11 @@ const Transactions = () => {
         await fetchAllData();
       } catch (error) {
         console.error('Failed to delete transaction:', error);
-        toast.error(error.response?.data?.message || 'Failed to delete transaction');
+        if (error.response?.status === 403) {
+          toast.error('Access denied. Admin or Finance Manager only.');
+        } else {
+          toast.error('Failed to delete transaction');
+        }
       }
     }
   };
@@ -143,7 +126,11 @@ const Transactions = () => {
       await fetchAllData();
     } catch (error) {
       console.error('Failed to clear transactions:', error);
-      toast.error(error.response?.data?.message || 'Failed to clear transactions');
+      if (error.response?.status === 403) {
+        toast.error('Access denied. Admin only.');
+      } else {
+        toast.error('Failed to clear transactions');
+      }
     }
   };
 
@@ -212,7 +199,6 @@ const Transactions = () => {
         budgetCategories={budgetCategories}
       />
 
-      {/* Clear All Confirmation Modal */}
       {isClearModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl p-6 w-full max-w-md">
@@ -221,24 +207,14 @@ const Transactions = () => {
                 <FaTrashAlt className="h-6 w-6 text-red-600" />
               </div>
               <h2 className="text-xl font-bold text-gray-800 mb-2">Clear All Transactions</h2>
-              <p className="text-gray-600">
-                Are you sure you want to delete all transactions? This action cannot be undone.
-              </p>
+              <p className="text-gray-600">Are you sure you want to delete all transactions? This action cannot be undone.</p>
+              {transactions.length > 0 && (
+                <p className="text-sm text-red-500 mt-2">⚠️ This will delete {transactions.length} transactions</p>
+              )}
             </div>
-
             <div className="flex gap-3">
-              <button
-                onClick={() => setIsClearModalOpen(false)}
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleClearAllTransactions}
-                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-              >
-                Yes, Delete All
-              </button>
+              <button onClick={() => setIsClearModalOpen(false)} className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">Cancel</button>
+              <button onClick={handleClearAllTransactions} className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">Yes, Delete All</button>
             </div>
           </div>
         </div>

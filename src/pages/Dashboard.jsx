@@ -1,18 +1,20 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
-  FaWallet, FaMoneyBillWave, FaChartLine, FaProjectDiagram, 
-  FaShoppingCart, FaCalendarAlt, FaExclamationTriangle, 
-  FaCheckCircle, FaSpinner, FaServer, FaWifiSlash
+  FaWallet, 
+  FaMoneyBillWave, 
+  FaChartLine, 
+  FaProjectDiagram, 
+  FaShoppingCart, 
+  FaCalendarAlt, 
+  FaExclamationTriangle, 
+  FaCheckCircle, 
+  FaSpinner
 } from 'react-icons/fa';
 import { 
   LineChart, Line, BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
   AreaChart, Area
 } from 'recharts';
-import StatsCardSkeleton from '../components/Skeleton/StatsCardSkeleton';
-import ChartSkeleton from '../components/Skeleton/ChartSkeleton';
-import TransactionListSkeleton from '../components/Skeleton/TransactionListSkeleton';
-import BudgetOverviewSkeleton from '../components/Skeleton/BudgetOverviewSkeleton';
 import StatsCard from '../components/Dashboard/StatsCard';
 import RecentTransactions from '../components/Dashboard/RecentTransactions';
 import BudgetOverview from '../components/Dashboard/BudgetOverview';
@@ -20,7 +22,6 @@ import transactionService from '../services/transactions';
 import projectService from '../services/projects';
 import budgetService from '../services/budget';
 import { formatCurrency } from '../utils/formatters';
-import { checkServerHealth } from '../services/healthCheck';
 
 const Dashboard = () => {
   const [stats, setStats] = useState({
@@ -35,11 +36,9 @@ const Dashboard = () => {
   const [weeklyData, setWeeklyData] = useState([]);
   const [budgetStatus, setBudgetStatus] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [serverSlow, setServerSlow] = useState(false);
   const [error, setError] = useState(null);
   const [selectedChart, setSelectedChart] = useState('trend');
   const fetchCalled = useRef(false);
-  const loadingTimeout = useRef(null);
 
   const COLORS = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16'];
 
@@ -48,41 +47,17 @@ const Dashboard = () => {
       fetchCalled.current = true;
       fetchDashboardData();
     }
-    
-    // Set timeout to detect slow server
-    loadingTimeout.current = setTimeout(() => {
-      if (loading) {
-        setServerSlow(true);
-      }
-    }, 3000);
-    
-    return () => {
-      if (loadingTimeout.current) {
-        clearTimeout(loadingTimeout.current);
-      }
-    };
   }, []);
 
   const fetchDashboardData = async () => {
     try {
       setError(null);
       
-      // Check server health
-      const isHealthy = await checkServerHealth();
-      if (!isHealthy) {
-        setServerSlow(true);
-      }
-      
       const [transactionsRes, projectsRes, budgetsRes] = await Promise.allSettled([
         transactionService.getTransactions({ limit: 100 }),
         projectService.getAllProjects(),
         budgetService.getBudgetStatus(),
       ]);
-
-      if (loadingTimeout.current) {
-        clearTimeout(loadingTimeout.current);
-        setServerSlow(false);
-      }
 
       if (transactionsRes.status === 'fulfilled') {
         const transactions = transactionsRes.value.data.transactions || [];
@@ -139,6 +114,11 @@ const Dashboard = () => {
   const fetchMonthlyTrend = async () => {
     try {
       const token = localStorage.getItem('token');
+      if (!token) {
+        setMonthlyData([]);
+        return;
+      }
+      
       const months = [];
       const currentDate = new Date();
       
@@ -149,21 +129,31 @@ const Dashboard = () => {
         const month = date.getMonth() + 1;
         const year = date.getFullYear();
         
-        const response = await fetch(`http://localhost:8000/api/transactions/monthly-summary?month=${month}&year=${year}`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        const data = await response.json();
-        
-        months.push({
-          name: monthName,
-          income: data.income || 0,
-          expense: data.expense || 0,
-          savings: (data.income || 0) - (data.expense || 0)
-        });
+        try {
+          const response = await fetch(`http://localhost:8000/api/transactions/monthly-summary?month=${month}&year=${year}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          
+          if (!response.ok) {
+            months.push({ name: monthName, income: 0, expense: 0, savings: 0 });
+            continue;
+          }
+          
+          const data = await response.json();
+          months.push({
+            name: monthName,
+            income: data.income || 0,
+            expense: data.expense || 0,
+            savings: (data.income || 0) - (data.expense || 0)
+          });
+        } catch (err) {
+          months.push({ name: monthName, income: 0, expense: 0, savings: 0 });
+        }
       }
       setMonthlyData(months);
     } catch (error) {
       console.error('Error fetching monthly trend:', error);
+      setMonthlyData([]);
     }
   };
 
@@ -222,7 +212,6 @@ const Dashboard = () => {
         weeklyDataArray.push({
           day: dayName,
           amount: expenseAmount,
-          fullDate: dateStr,
           displayDate: currentDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })
         });
       }
@@ -266,42 +255,12 @@ const Dashboard = () => {
     },
   ];
 
-  // Show skeleton loader when server is slow or loading
-  if (loading && serverSlow) {
-    return (
-      <div className="space-y-6">
-        <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-4">
-          <div className="flex items-center gap-2">
-            <FaServer className="text-yellow-600 animate-pulse" />
-            <p className="text-yellow-700">Server is responding slowly. Please wait...</p>
-          </div>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {[1, 2, 3, 4].map((i) => (
-            <StatsCardSkeleton key={i} />
-          ))}
-        </div>
-        <ChartSkeleton />
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <TransactionListSkeleton />
-          <BudgetOverviewSkeleton />
-        </div>
-      </div>
-    );
-  }
-
   if (loading) {
     return (
-      <div className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {[1, 2, 3, 4].map((i) => (
-            <StatsCardSkeleton key={i} />
-          ))}
-        </div>
-        <ChartSkeleton />
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <TransactionListSkeleton />
-          <BudgetOverviewSkeleton />
+      <div className="flex items-center justify-center h-96">
+        <div className="text-center">
+          <FaSpinner className="animate-spin text-4xl text-blue-600 mx-auto mb-4" />
+          <p className="text-gray-600">Loading dashboard...</p>
         </div>
       </div>
     );
@@ -309,15 +268,15 @@ const Dashboard = () => {
 
   if (error) {
     return (
-      <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
-        <FaWifiSlash className="w-12 h-12 text-red-500 mx-auto mb-3" />
-        <p className="text-red-600">{error}</p>
+      <div className="bg-red-50 border border-red-200 rounded-xl p-8 text-center">
+        <div className="text-red-500 text-6xl mb-4">⚠️</div>
+        <p className="text-red-600 text-lg">{error}</p>
         <button 
           onClick={() => {
             fetchCalled.current = false;
             fetchDashboardData();
           }}
-          className="mt-2 text-blue-600 hover:text-blue-700"
+          className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
         >
           Try Again
         </button>
@@ -403,8 +362,11 @@ const Dashboard = () => {
         {selectedChart === 'trend' && (
           <>
             <h3 className="text-lg font-semibold text-gray-800 mb-4">Monthly Income vs Expense Trend</h3>
-            {monthlyData.length === 0 ? (
-              <div className="text-center py-12 text-gray-500">No data available</div>
+            {monthlyData.length === 0 || monthlyData.every(d => d.income === 0 && d.expense === 0) ? (
+              <div className="text-center py-12 text-gray-500">
+                <p>No data available</p>
+                <p className="text-sm mt-2">Add transactions to see your monthly trend</p>
+              </div>
             ) : (
               <ResponsiveContainer width="100%" height={350}>
                 <AreaChart data={monthlyData}>
@@ -428,6 +390,7 @@ const Dashboard = () => {
               <div className="text-center py-12 text-gray-500">
                 <FaShoppingCart className="w-12 h-12 mx-auto mb-3 text-gray-300" />
                 <p>No expense data available</p>
+                <p className="text-sm mt-2">Add expense transactions to see category breakdown</p>
               </div>
             ) : (
               <div className="flex flex-col lg:flex-row gap-6">

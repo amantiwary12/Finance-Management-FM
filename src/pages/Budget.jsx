@@ -16,7 +16,6 @@ const Budget = () => {
   const [editSpentAmount, setEditSpentAmount] = useState(0);
   const [removeAmount, setRemoveAmount] = useState(0);
   const [status, setStatus] = useState(null);
-  const [fetching, setFetching] = useState(false);
   const [formData, setFormData] = useState({
     category: '',
     amount: '',
@@ -38,29 +37,26 @@ const Budget = () => {
 
   // Fetch all budgets
   const fetchBudgets = async () => {
-    if (fetching) return;
-    setFetching(true);
-    setLoading(true);
-    
     try {
+      setLoading(true);
       const response = await budgetService.getBudgets();
-      console.log('All budgets:', response.data);
-      setBudgets(response.data?.budgets || []);
+      console.log('All budgets response:', response.data);
       
-      // Add delay before fetching status to avoid rate limiting
-      await new Promise(resolve => setTimeout(resolve, 300));
+      // Handle response - budgets array is directly in response.data.budgets
+      const budgetsData = response.data?.budgets || [];
+      setBudgets(budgetsData);
       
       const statusResponse = await budgetService.getBudgetStatus();
       setStatus(statusResponse.data);
+      
     } catch (error) {
       console.error('Fetch error:', error);
-      if (error.response?.status === 429) {
-        // Silently handle rate limiting
-        console.log('Rate limited, will retry later');
+      if (error.response?.status === 403) {
+        // Silent fail for permission issues
+        console.log('Permission denied for budget status');
       }
     } finally {
       setLoading(false);
-      setFetching(false);
     }
   };
 
@@ -94,15 +90,19 @@ const Budget = () => {
           year: new Date().getFullYear(),
           date: new Date().toISOString().split('T')[0]
         });
-        await fetchBudgets();
+        fetchBudgets();
       }
     } catch (error) {
       console.error('Submit error:', error);
-      alert(error.response?.data?.message || 'Something went wrong');
+      if (error.response?.status === 403) {
+        alert('Access denied. Admin or Finance Manager only.');
+      } else {
+        alert(error.response?.data?.message || 'Something went wrong');
+      }
     }
   };
 
-  // Add expense
+  // Add expense to specific budget (accumulates)
   const handleAddExpense = async () => {
     if (expenseAmount <= 0) {
       alert('Please enter a valid expense amount');
@@ -115,14 +115,18 @@ const Budget = () => {
       setIsExpenseModalOpen(false);
       setExpenseAmount(0);
       setSelectedBudget(null);
-      await fetchBudgets();
+      fetchBudgets();
     } catch (error) {
       console.error('Add expense error:', error);
-      alert(error.response?.data?.message || 'Failed to add expense');
+      if (error.response?.status === 403) {
+        alert('Access denied. Admin or Finance Manager only.');
+      } else {
+        alert(error.response?.data?.message || 'Failed to add expense');
+      }
     }
   };
 
-  // Edit spent amount
+  // Edit spent amount - DIRECTLY SETS the total spent
   const handleEditSpent = async () => {
     if (editSpentAmount < 0) {
       alert('Please enter a valid spent amount');
@@ -140,14 +144,18 @@ const Budget = () => {
       setIsEditSpentModalOpen(false);
       setEditSpentAmount(0);
       setSelectedBudget(null);
-      await fetchBudgets();
+      fetchBudgets();
     } catch (error) {
       console.error('Edit spent error:', error);
-      alert(error.response?.data?.message || 'Failed to update spent amount');
+      if (error.response?.status === 403) {
+        alert('Access denied. Admin or Finance Manager only.');
+      } else {
+        alert(error.response?.data?.message || 'Failed to update spent amount');
+      }
     }
   };
 
-  // Remove spent amount
+  // Remove spent amount - SUBTRACTS amount from current spent
   const handleRemoveSpent = async () => {
     if (removeAmount <= 0) {
       alert('Please enter a valid amount to remove');
@@ -165,10 +173,14 @@ const Budget = () => {
       setIsRemoveSpentModalOpen(false);
       setRemoveAmount(0);
       setSelectedBudget(null);
-      await fetchBudgets();
+      fetchBudgets();
     } catch (error) {
       console.error('Remove spent error:', error);
-      alert(error.response?.data?.message || 'Failed to remove amount');
+      if (error.response?.status === 403) {
+        alert('Access denied. Admin or Finance Manager only.');
+      } else {
+        alert(error.response?.data?.message || 'Failed to remove amount');
+      }
     }
   };
 
@@ -179,10 +191,14 @@ const Budget = () => {
       alert('Budget deleted!');
       setIsDeleteModalOpen(false);
       setDeletingBudget(null);
-      await fetchBudgets();
+      fetchBudgets();
     } catch (error) {
       console.error('Delete error:', error);
-      alert('Failed to delete budget');
+      if (error.response?.status === 403) {
+        alert('Access denied. Admin only.');
+      } else {
+        alert('Failed to delete budget');
+      }
     }
   };
 
@@ -487,7 +503,6 @@ const Budget = () => {
         </div>
       )}
 
-      {/* Modals - Keep your existing modal code here */}
       {/* Create Budget Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -598,19 +613,6 @@ const Budget = () => {
                   autoFocus
                 />
               </div>
-              <div className="bg-gray-50 rounded-lg p-3">
-                <p className="text-sm text-gray-600">After adding:</p>
-                <div className="flex justify-between mt-1">
-                  <span>Total Spent:</span>
-                  <span className="font-semibold">{formatCurrency((selectedBudget.spentAmount || 0) + expenseAmount)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Remaining:</span>
-                  <span className={`font-semibold ${(selectedBudget.amount - ((selectedBudget.spentAmount || 0) + expenseAmount)) < 0 ? 'text-red-600' : 'text-green-600'}`}>
-                    {formatCurrency(Math.max(0, selectedBudget.amount - ((selectedBudget.spentAmount || 0) + expenseAmount)))}
-                  </span>
-                </div>
-              </div>
               <button onClick={handleAddExpense} className="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700">
                 Add Expense
               </button>
@@ -695,6 +697,7 @@ const Budget = () => {
                   max={selectedBudget.spentAmount || 0}
                   autoFocus
                 />
+                <p className="text-xs text-gray-500 mt-1">Max removable: {formatCurrency(selectedBudget.spentAmount || 0)}</p>
               </div>
               <button onClick={handleRemoveSpent} className="w-full bg-orange-600 text-white py-2 rounded-lg hover:bg-orange-700">
                 Remove Amount
@@ -716,6 +719,8 @@ const Budget = () => {
               </div>
               <h2 className="text-xl font-bold text-gray-800 mb-2">Delete Budget</h2>
               <p className="text-gray-600">Are you sure you want to delete this budget entry?</p>
+              <p className="text-sm text-gray-500 mt-1">Category: <strong>{deletingBudget.category}</strong></p>
+              <p className="text-sm text-gray-500">Amount: {formatCurrency(deletingBudget.amount)}</p>
             </div>
             <div className="flex gap-3">
               <button onClick={() => setIsDeleteModalOpen(false)} className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">Cancel</button>

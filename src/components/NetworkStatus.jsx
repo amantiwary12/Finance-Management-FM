@@ -1,11 +1,16 @@
 import React from 'react';
-import { FaWifi, FaWifiSlash, FaSync } from 'react-icons/fa';
+import { FaWifi, FaSync } from 'react-icons/fa';
 
 const NetworkStatus = ({ isOnline, wasOffline }) => {
   if (!isOnline) {
     return (
       <div className="fixed bottom-4 right-4 z-50 bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2 animate-pulse">
-        <FaWifiSlash className="w-4 h-4" />
+        <div className="relative">
+          <FaWifi className="w-4 h-4" />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="w-full h-[2px] bg-white rotate-45 transform origin-center"></div>
+          </div>
+        </div>
         <span className="text-sm">No internet connection</span>
       </div>
     );

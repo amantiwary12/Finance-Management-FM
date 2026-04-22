@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { FaTimes, FaInfoCircle, FaImage, FaTrash } from 'react-icons/fa';
+import { FaTimes, FaImage, FaTrash } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 
 const TransactionForm = ({ isOpen, onClose, onSubmit, projects, budgetCategories = [] }) => {
   const [formData, setFormData] = useState({
+    title: '',      // TITLE IS REQUIRED - ADD THIS
     amount: '',
     type: 'expense',
     category: '',
@@ -34,19 +35,15 @@ const TransactionForm = ({ isOpen, onClose, onSubmit, projects, budgetCategories
   const handleScreenshotChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      // Validate file type
       const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
       if (!allowedTypes.includes(file.type)) {
         toast.error('Only JPEG, PNG, WEBP images are allowed');
         return;
       }
-      
-      // Validate file size (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
         toast.error('File size must be less than 5MB');
         return;
       }
-      
       setScreenshot(file);
       setScreenshotPreview(URL.createObjectURL(file));
     }
@@ -64,6 +61,13 @@ const TransactionForm = ({ isOpen, onClose, onSubmit, projects, budgetCategories
     e.preventDefault();
     setIsSubmitting(true);
     
+    // Validate required fields
+    if (!formData.title || formData.title.trim() === '') {
+      toast.error('Please enter a title');
+      setIsSubmitting(false);
+      return;
+    }
+    
     if (!formData.amount || parseFloat(formData.amount) <= 0) {
       toast.error('Please enter a valid amount');
       setIsSubmitting(false);
@@ -78,6 +82,7 @@ const TransactionForm = ({ isOpen, onClose, onSubmit, projects, budgetCategories
     
     // Create FormData for multipart/form-data (for file upload)
     const submitData = new FormData();
+    submitData.append('title', formData.title);
     submitData.append('amount', Number(formData.amount));
     submitData.append('type', formData.type);
     submitData.append('category', formData.category);
@@ -87,12 +92,20 @@ const TransactionForm = ({ isOpen, onClose, onSubmit, projects, budgetCategories
     if (formData.project && formData.project !== '') submitData.append('project', formData.project);
     if (screenshot) submitData.append('screenshot', screenshot);
     
-    console.log('Submitting transaction with screenshot:', screenshot ? 'Yes' : 'No');
+    console.log('Submitting transaction with data:', {
+      title: formData.title,
+      amount: formData.amount,
+      type: formData.type,
+      category: formData.category,
+      hasScreenshot: !!screenshot
+    });
     
     try {
       await onSubmit(submitData);
+      toast.success('Transaction created successfully!');
       // Reset form on success
       setFormData({
+        title: '',
         amount: '',
         type: 'expense',
         category: '',
@@ -105,7 +118,11 @@ const TransactionForm = ({ isOpen, onClose, onSubmit, projects, budgetCategories
       onClose();
     } catch (error) {
       console.error('Submit failed:', error);
-      toast.error(error.response?.data?.message || 'Failed to create transaction');
+      if (error.response?.status === 403) {
+        toast.error('Access denied. Admin or Finance Manager only.');
+      } else {
+        toast.error(error.response?.data?.message || 'Failed to create transaction');
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -114,6 +131,7 @@ const TransactionForm = ({ isOpen, onClose, onSubmit, projects, budgetCategories
   useEffect(() => {
     if (!isOpen) {
       setFormData({
+        title: '',
         amount: '',
         type: 'expense',
         category: '',
@@ -129,7 +147,6 @@ const TransactionForm = ({ isOpen, onClose, onSubmit, projects, budgetCategories
   if (!isOpen) return null;
 
   const currentCategories = formData.type === 'income' ? incomeCategories : expenseCategories;
-  const isExpense = formData.type === 'expense';
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -145,6 +162,22 @@ const TransactionForm = ({ isOpen, onClose, onSubmit, projects, budgetCategories
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
+          {/* Title - REQUIRED */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Title <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              name="title"
+              value={formData.title}
+              onChange={handleChange}
+              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+              placeholder="e.g., Grocery Shopping, Salary, Electricity Bill"
+              required
+            />
+          </div>
+
           {/* Transaction Type */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Type</label>
@@ -262,24 +295,12 @@ const TransactionForm = ({ isOpen, onClose, onSubmit, projects, budgetCategories
                   className="hidden"
                 />
               </label>
-              <span className="text-xs text-gray-500">
-                Max 5MB (JPG, PNG, WEBP)
-              </span>
+              <span className="text-xs text-gray-500">Max 5MB (JPG, PNG, WEBP)</span>
             </div>
-            
-            {/* Screenshot Preview */}
             {screenshotPreview && (
               <div className="mt-3 relative inline-block">
-                <img
-                  src={screenshotPreview}
-                  alt="Preview"
-                  className="w-32 h-32 object-cover rounded-lg border border-gray-200"
-                />
-                <button
-                  type="button"
-                  onClick={removeScreenshot}
-                  className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
-                >
+                <img src={screenshotPreview} alt="Preview" className="w-32 h-32 object-cover rounded-lg border border-gray-200" />
+                <button type="button" onClick={removeScreenshot} className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600">
                   <FaTrash className="w-3 h-3" />
                 </button>
               </div>
