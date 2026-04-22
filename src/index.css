@@ -1,0 +1,295 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-gray-50;
+    margin: 0;
+    padding: 0;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-all duration-200 font-medium;
+  }
+  
+  .btn-secondary {
+    @apply bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition-all duration-200 font-medium;
+  }
+  
+  .input-field {
+    @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all;
+  }
+  
+  .card {
+    @apply bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-200;
+  }
+}
+
+/* Animation Keyframes */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Animation Classes */
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.animate-fade-out {
+  animation: fadeOut 0.3s ease-in;
+}
+
+.animate-pulse-slow {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-spin-slow {
+  animation: spin 1.5s linear infinite;
+}
+
+/* Skeleton Loading Styles */
+.skeleton {
+  @apply bg-gray-200 rounded;
+  position: relative;
+  overflow: hidden;
+}
+
+.skeleton::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  animation: shimmer 1.5s infinite;
+}
+
+.skeleton-text {
+  @apply bg-gray-200 rounded;
+  height: 1rem;
+  width: 100%;
+}
+
+.skeleton-circle {
+  @apply bg-gray-200 rounded-full;
+}
+
+/* Network Status Toast Animation */
+.network-toast {
+  animation: slideIn 0.3s ease-out;
+}
+
+.network-toast-exit {
+  animation: fadeOut 0.3s ease-in;
+}
+
+/* Loading Spinner */
+.loading-spinner {
+  @apply border-4 border-gray-200 border-t-blue-600 rounded-full;
+  width: 40px;
+  height: 40px;
+  animation: spin 0.8s linear infinite;
+}
+
+.loading-spinner-sm {
+  @apply border-2 border-gray-200 border-t-blue-600 rounded-full;
+  width: 20px;
+  height: 20px;
+  animation: spin 0.8s linear infinite;
+}
+
+.loading-spinner-lg {
+  @apply border-4 border-gray-200 border-t-blue-600 rounded-full;
+  width: 60px;
+  height: 60px;
+  animation: spin 0.8s linear infinite;
+}
+
+/* Card Hover Effects */
+.card-hover {
+  @apply transition-all duration-300;
+}
+
+.card-hover:hover {
+  @apply shadow-lg transform -translate-y-1;
+}
+
+/* Gradient Backgrounds */
+.bg-gradient-primary {
+  @apply bg-gradient-to-r from-blue-600 to-blue-700;
+}
+
+.bg-gradient-success {
+  @apply bg-gradient-to-r from-green-500 to-emerald-600;
+}
+
+.bg-gradient-danger {
+  @apply bg-gradient-to-r from-red-500 to-red-600;
+}
+
+.bg-gradient-warning {
+  @apply bg-gradient-to-r from-yellow-500 to-orange-500;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-gray-100 rounded;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-400 rounded;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-500;
+}
+
+/* Focus Styles */
+.focus-ring {
+  @apply focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2;
+}
+
+/* Disabled Button Styles */
+.btn-disabled {
+  @apply opacity-50 cursor-not-allowed;
+}
+
+/* Status Badges */
+.badge-success {
+  @apply bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-xs font-medium;
+}
+
+.badge-warning {
+  @apply bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full text-xs font-medium;
+}
+
+.badge-danger {
+  @apply bg-red-100 text-red-700 px-2 py-0.5 rounded-full text-xs font-medium;
+}
+
+.badge-info {
+  @apply bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full text-xs font-medium;
+}
+
+.badge-neutral {
+  @apply bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full text-xs font-medium;
+}
+
+/* Progress Bar Animation */
+.progress-bar {
+  @apply transition-all duration-500 ease-out;
+}
+
+/* Table Styles */
+.table-row-hover {
+  @apply hover:bg-gray-50 transition-colors duration-200;
+}
+
+/* Modal Animation */
+.modal-enter {
+  animation: fadeIn 0.2s ease-out;
+}
+
+.modal-exit {
+  animation: fadeOut 0.2s ease-in;
+}
+
+/* Chart Container */
+.chart-container {
+  @apply w-full h-full;
+}
+
+/* Responsive Text */
+.text-responsive {
+  @apply text-sm md:text-base;
+}
+
+.heading-responsive {
+  @apply text-xl md:text-2xl lg:text-3xl font-bold;
+}
+
+/* Print Styles */
+@media print {
+  .no-print {
+    display: none;
+  }
+  
+  .print-only {
+    display: block;
+  }
+  
+  body {
+    @apply bg-white;
+  }
+}
