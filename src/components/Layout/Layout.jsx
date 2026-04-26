@@ -1,3 +1,4 @@
+//layout jsx 
 import React, { useContext } from 'react';
 import { Outlet, Link, useLocation, Navigate } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext';
@@ -8,7 +9,8 @@ import {
   FaChartPie, 
   FaBell,
   FaSignOutAlt,
-  FaUserCircle
+  FaUserCircle,
+  FaUsers
 } from 'react-icons/fa';
 
 const Layout = () => {
@@ -27,8 +29,20 @@ const Layout = () => {
     { path: '/notifications', icon: FaBell, label: 'Notifications' },
   ];
 
-  // Helper function to check if link is active
+  // Add User Management for Admin only
+  if (user.role === 'Admin') {
+    menuItems.push({ path: '/users', icon: FaUsers, label: 'User Management' });
+  }
+
   const isActive = (path) => location.pathname === path;
+
+  const getRoleBadgeColor = () => {
+    switch (user.role) {
+      case 'Admin': return 'bg-red-500';
+      case 'Manager': return 'bg-blue-500';
+      default: return 'bg-green-500';
+    }
+  };
 
   return (
     <div className="flex h-screen bg-gray-100">
@@ -37,6 +51,9 @@ const Layout = () => {
         <div className="p-6 border-b border-gray-700">
           <h1 className="text-2xl font-bold">Expense Tracker</h1>
           <p className="text-xs text-gray-400 mt-1">Track your finances</p>
+          <span className={`inline-block mt-2 px-2 py-0.5 rounded-full text-xs ${getRoleBadgeColor()}`}>
+            {user.role}
+          </span>
         </div>
         
         <nav className="flex-1 mt-6">
@@ -58,8 +75,8 @@ const Layout = () => {
           <div className="flex items-center mb-4 p-2 bg-gray-800 rounded-lg">
             <FaUserCircle className="w-8 h-8 text-gray-400 mr-3" />
             <div className="flex-1">
-              <p className="text-sm font-medium">{user?.name}</p>
-              <p className="text-xs text-gray-400">{user?.mobileNumber}</p>
+              <p className="text-sm font-medium">{user.name}</p>
+              <p className="text-xs text-gray-400">{user.mobileNumber}</p>
             </div>
           </div>
           <button
@@ -74,11 +91,10 @@ const Layout = () => {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Header */}
         <header className="bg-white shadow-sm border-b border-gray-200">
           <div className="px-6 py-4">
             <h2 className="text-xl font-semibold text-gray-800">
-              Welcome back, {user?.name}!
+              Welcome back, {user.name}!
             </h2>
             <p className="text-sm text-gray-600 mt-1">
               Here's what's happening with your projects today.
@@ -86,7 +102,6 @@ const Layout = () => {
           </div>
         </header>
 
-        {/* Page Content */}
         <main className="flex-1 overflow-y-auto p-6">
           <Outlet />
         </main>

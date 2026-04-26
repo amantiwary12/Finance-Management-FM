@@ -1,14 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
-  FaWallet, 
-  FaMoneyBillWave, 
-  FaChartLine, 
-  FaProjectDiagram, 
-  FaShoppingCart, 
-  FaCalendarAlt, 
-  FaExclamationTriangle, 
-  FaCheckCircle, 
-  FaSpinner
+  FaWallet, FaMoneyBillWave, FaChartLine, FaProjectDiagram, 
+  FaShoppingCart, FaExclamationTriangle, FaCheckCircle, FaSpinner,
+  FaUser, FaCalendarWeek, FaCalendarAlt
 } from 'react-icons/fa';
 import { 
   LineChart, Line, BarChart, Bar, PieChart, Pie, Cell,
@@ -33,16 +27,21 @@ const Dashboard = () => {
   const [recentTransactions, setRecentTransactions] = useState([]);
   const [monthlyData, setMonthlyData] = useState([]);
   const [categoryData, setCategoryData] = useState([]);
-  const [weeklyData, setWeeklyData] = useState([]);
+  const [weeklySummary, setWeeklySummary] = useState(null);
+  const [monthlySummary, setMonthlySummary] = useState(null);
   const [budgetStatus, setBudgetStatus] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedChart, setSelectedChart] = useState('trend');
+  const [userRole, setUserRole] = useState(null);
   const fetchCalled = useRef(false);
 
   const COLORS = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16'];
 
   useEffect(() => {
+    const user = JSON.parse(localStorage.getItem('user'));
+    setUserRole(user?.role);
+    
     if (!fetchCalled.current) {
       fetchCalled.current = true;
       fetchDashboardData();
@@ -52,15 +51,20 @@ const Dashboard = () => {
   const fetchDashboardData = async () => {
     try {
       setError(null);
+      setLoading(true);
       
-      const [transactionsRes, projectsRes, budgetsRes] = await Promise.allSettled([
-        transactionService.getTransactions({ limit: 100 }),
-        projectService.getAllProjects(),
-        budgetService.getBudgetStatus(),
-      ]);
+      // Fetch transactions
+      const transactionsRes = await transactionService.getTransactions({ limit: 100 });
+      
+      // Fetch projects
+      const projectsRes = await projectService.getAllProjects();
+      
+      // Fetch budget status
+      const budgetsRes = await budgetService.getBudgetStatus();
 
-      if (transactionsRes.status === 'fulfilled') {
-        const transactions = transactionsRes.value.data.transactions || [];
+      // Handle transactions
+      if (transactionsRes && transactionsRes.data) {
+        const transactions = transactionsRes.data.transactions || [];
         const totalIncome = transactions
           .filter(t => t.type === 'income')
           .reduce((sum, t) => sum + t.amount, 0);
@@ -76,6 +80,7 @@ const Dashboard = () => {
         }));
         setRecentTransactions(transactions.slice(0, 5));
         
+        // Process category data for pie chart
         const categoryExpenses = {};
         transactions.filter(t => t.type === 'expense').forEach(t => {
           categoryExpenses[t.category] = (categoryExpenses[t.category] || 0) + t.amount;
@@ -88,20 +93,24 @@ const Dashboard = () => {
         setCategoryData(categoryChartData);
       }
 
-      if (projectsRes.status === 'fulfilled') {
-        const projects = projectsRes.value.data.projects || [];
+      // Handle projects
+      if (projectsRes && projectsRes.data) {
+        const projects = projectsRes.data.projects || [];
         setStats(prev => ({
           ...prev,
           activeProjects: projects.filter(p => p.status === 'active').length,
         }));
       }
 
-      if (budgetsRes.status === 'fulfilled') {
-        setBudgetStatus(budgetsRes.value.data);
+      // Handle budget status
+      if (budgetsRes && budgetsRes.data) {
+        setBudgetStatus(budgetsRes.data);
       }
 
+      // Fetch weekly and monthly summaries
+      await fetchWeeklySummary();
+      await fetchMonthlySummary();
       await fetchMonthlyTrend();
-      await fetchWeeklyActivity();
 
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
@@ -111,116 +120,115 @@ const Dashboard = () => {
     }
   };
 
+  // ✅ FIXED: Using the correct endpoint
+  const fetchWeeklySummary = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      console.log('Fetching weekly summary from: /api/transactions/weekly-summary');
+      
+      const response = await fetch('http://localhost:8000/api/transactions/weekly-summary', {
+        method: 'GET',
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Weekly summary response:', data);
+        setWeeklySummary(data);
+      } else {
+        console.error('Weekly summary failed with status:', response.status);
+        setWeeklySummary(null);
+      }
+    } catch (error) {
+      console.error('Error fetching weekly summary:', error);
+      setWeeklySummary(null);
+    }
+  };
+
+  // ✅ FIXED: Using the correct endpoint with month and year
+  const fetchMonthlySummary = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const now = new Date();
+      const month = now.getMonth() + 1;
+      const year = now.getFullYear();
+      
+      console.log(`Fetching monthly summary from: /api/transactions/monthly-summary?month=${month}&year=${year}`);
+      
+      const response = await fetch(`http://localhost:8000/api/transactions/monthly-summary?month=${month}&year=${year}`, {
+        method: 'GET',
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Monthly summary response:', data);
+        setMonthlySummary(data);
+      } else {
+        console.error('Monthly summary failed with status:', response.status);
+        setMonthlySummary(null);
+      }
+    } catch (error) {
+      console.error('Error fetching monthly summary:', error);
+      setMonthlySummary(null);
+    }
+  };
+
+  // ✅ FIXED: Fetch monthly trend for last 6 months
   const fetchMonthlyTrend = async () => {
     try {
       const token = localStorage.getItem('token');
-      if (!token) {
-        setMonthlyData([]);
-        return;
-      }
-      
       const months = [];
       const currentDate = new Date();
+      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
       
       for (let i = 5; i >= 0; i--) {
         const date = new Date();
         date.setMonth(currentDate.getMonth() - i);
-        const monthName = date.toLocaleString('default', { month: 'short' });
         const month = date.getMonth() + 1;
         const year = date.getFullYear();
+        const monthName = monthNames[date.getMonth()];
         
-        try {
-          const response = await fetch(`http://localhost:8000/api/transactions/monthly-summary?month=${month}&year=${year}`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-          });
-          
-          if (!response.ok) {
-            months.push({ name: monthName, income: 0, expense: 0, savings: 0 });
-            continue;
+        console.log(`Fetching monthly data for: month=${month}, year=${year}`);
+        
+        const response = await fetch(`http://localhost:8000/api/transactions/monthly-summary?month=${month}&year=${year}`, {
+          method: 'GET',
+          headers: { 
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
           }
-          
+        });
+        
+        if (response.ok) {
           const data = await response.json();
           months.push({
-            name: monthName,
+            name: `${monthName} ${year.toString().slice(-2)}`,
             income: data.income || 0,
             expense: data.expense || 0,
             savings: (data.income || 0) - (data.expense || 0)
           });
-        } catch (err) {
-          months.push({ name: monthName, income: 0, expense: 0, savings: 0 });
+        } else {
+          months.push({
+            name: `${monthName} ${year.toString().slice(-2)}`,
+            income: 0,
+            expense: 0,
+            savings: 0
+          });
         }
       }
+      
+      console.log('Monthly trend data:', months);
       setMonthlyData(months);
+      
     } catch (error) {
       console.error('Error fetching monthly trend:', error);
       setMonthlyData([]);
-    }
-  };
-
-  const fetchWeeklyActivity = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      
-      if (!token) {
-        setWeeklyData([]);
-        return;
-      }
-      
-      const today = new Date();
-      const startDate = new Date(today);
-      startDate.setDate(today.getDate() - 6);
-      
-      const formatYMD = (date) => {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
-      };
-      
-      const startDateStr = formatYMD(startDate);
-      const endDateStr = formatYMD(today);
-      
-      const response = await fetch(
-        `http://localhost:8000/api/transactions/daily-expenses?startDate=${startDateStr}&endDate=${endDateStr}`,
-        { headers: { 'Authorization': `Bearer ${token}` } }
-      );
-      
-      if (!response.ok) {
-        setWeeklyData([]);
-        return;
-      }
-      
-      const result = await response.json();
-      
-      const expenseMap = new Map();
-      if (result.data && Array.isArray(result.data)) {
-        result.data.forEach(item => {
-          expenseMap.set(item._id, item.total);
-        });
-      }
-      
-      const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-      const weeklyDataArray = [];
-      
-      for (let i = 0; i < 7; i++) {
-        const currentDate = new Date(startDate);
-        currentDate.setDate(startDate.getDate() + i);
-        const dateStr = formatYMD(currentDate);
-        const dayName = days[currentDate.getDay()];
-        const expenseAmount = expenseMap.get(dateStr) || 0;
-        
-        weeklyDataArray.push({
-          day: dayName,
-          amount: expenseAmount,
-          displayDate: currentDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })
-        });
-      }
-      
-      setWeeklyData(weeklyDataArray);
-      
-    } catch (error) {
-      console.error('Error fetching weekly activity:', error);
-      setWeeklyData([]);
     }
   };
 
@@ -260,7 +268,7 @@ const Dashboard = () => {
       <div className="flex items-center justify-center h-96">
         <div className="text-center">
           <FaSpinner className="animate-spin text-4xl text-blue-600 mx-auto mb-4" />
-          <p className="text-gray-600">Loading dashboard...</p>
+          <p className="mt-4 text-gray-600">Loading your financial dashboard...</p>
         </div>
       </div>
     );
@@ -268,15 +276,14 @@ const Dashboard = () => {
 
   if (error) {
     return (
-      <div className="bg-red-50 border border-red-200 rounded-xl p-8 text-center">
-        <div className="text-red-500 text-6xl mb-4">⚠️</div>
-        <p className="text-red-600 text-lg">{error}</p>
+      <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
+        <p className="text-red-600">{error}</p>
         <button 
           onClick={() => {
             fetchCalled.current = false;
             fetchDashboardData();
           }}
-          className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          className="mt-2 text-blue-600 hover:text-blue-700"
         >
           Try Again
         </button>
@@ -291,10 +298,14 @@ const Dashboard = () => {
         <div className="flex justify-between items-start">
           <div>
             <h2 className="text-2xl font-bold">Financial Dashboard</h2>
-            <p className="text-blue-100 mt-1">Here's your financial overview for {new Date().toLocaleString('default', { month: 'long', year: 'numeric' })}</p>
+            <p className="text-blue-100 mt-1">
+              {userRole === 'Admin' ? 'Admin View - All Transactions' : 'Your Financial Overview'}
+              for {new Date().toLocaleString('default', { month: 'long', year: 'numeric' })}
+            </p>
           </div>
-          <div className="bg-white/20 rounded-lg px-3 py-1 text-sm">
-            Last updated: {new Date().toLocaleTimeString()}
+          <div className="bg-white/20 rounded-lg px-3 py-1 text-sm flex items-center gap-2">
+            <FaUser className="w-3 h-3" />
+            {userRole || 'Employee'}
           </div>
         </div>
       </div>
@@ -302,8 +313,77 @@ const Dashboard = () => {
       {/* Stats Cards Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {statCards.map((card, index) => (
-          <StatsCard key={index} {...card} />
+          <div key={index} className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-gray-500 text-sm">{card.title}</p>
+                <p className="text-2xl font-bold text-gray-800 mt-2">{card.value}</p>
+              </div>
+              <div className={`${card.bgColor} p-3 rounded-full`}>
+                <card.icon className={`w-6 h-6 ${card.color}`} />
+              </div>
+            </div>
+          </div>
         ))}
+      </div>
+
+      {/* Weekly & Monthly Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Weekly Summary Card */}
+        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+          <div className="flex items-center gap-2 mb-4">
+            <FaCalendarWeek className="w-5 h-5 text-blue-500" />
+            <h3 className="text-lg font-semibold text-gray-800">This Week's Summary</h3>
+          </div>
+          {weeklySummary ? (
+            <div className="space-y-3">
+              <div className="flex justify-between items-center pb-2 border-b border-gray-100">
+                <span className="text-gray-600">Income</span>
+                <span className="text-green-600 font-semibold">{formatCurrency(weeklySummary.income || 0)}</span>
+              </div>
+              <div className="flex justify-between items-center pb-2 border-b border-gray-100">
+                <span className="text-gray-600">Expense</span>
+                <span className="text-red-600 font-semibold">{formatCurrency(weeklySummary.expense || 0)}</span>
+              </div>
+              <div className="flex justify-between items-center pt-2">
+                <span className="text-gray-700 font-medium">Balance</span>
+                <span className={`font-bold ${(weeklySummary.balance || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  {formatCurrency(weeklySummary.balance || 0)}
+                </span>
+              </div>
+            </div>
+          ) : (
+            <p className="text-gray-500 text-center py-4">No transactions this week</p>
+          )}
+        </div>
+
+        {/* Monthly Summary Card */}
+        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+          <div className="flex items-center gap-2 mb-4">
+            <FaCalendarAlt className="w-5 h-5 text-purple-500" />
+            <h3 className="text-lg font-semibold text-gray-800">This Month's Summary</h3>
+          </div>
+          {monthlySummary ? (
+            <div className="space-y-3">
+              <div className="flex justify-between items-center pb-2 border-b border-gray-100">
+                <span className="text-gray-600">Income</span>
+                <span className="text-green-600 font-semibold">{formatCurrency(monthlySummary.income || 0)}</span>
+              </div>
+              <div className="flex justify-between items-center pb-2 border-b border-gray-100">
+                <span className="text-gray-600">Expense</span>
+                <span className="text-red-600 font-semibold">{formatCurrency(monthlySummary.expense || 0)}</span>
+              </div>
+              <div className="flex justify-between items-center pt-2">
+                <span className="text-gray-700 font-medium">Balance</span>
+                <span className={`font-bold ${(monthlySummary.balance || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  {formatCurrency(monthlySummary.balance || 0)}
+                </span>
+              </div>
+            </div>
+          ) : (
+            <p className="text-gray-500 text-center py-4">No transactions this month</p>
+          )}
+        </div>
       </div>
 
       {/* Budget Alerts */}
@@ -345,16 +425,6 @@ const Dashboard = () => {
         >
           Category Breakdown
         </button>
-        <button
-          onClick={() => setSelectedChart('weekly')}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-            selectedChart === 'weekly' 
-              ? 'bg-blue-600 text-white' 
-              : 'text-gray-600 hover:bg-gray-100'
-          }`}
-        >
-          Weekly Activity
-        </button>
       </div>
 
       {/* Charts Section */}
@@ -364,8 +434,8 @@ const Dashboard = () => {
             <h3 className="text-lg font-semibold text-gray-800 mb-4">Monthly Income vs Expense Trend</h3>
             {monthlyData.length === 0 || monthlyData.every(d => d.income === 0 && d.expense === 0) ? (
               <div className="text-center py-12 text-gray-500">
-                <p>No data available</p>
-                <p className="text-sm mt-2">Add transactions to see your monthly trend</p>
+                <p>No transaction data available for the last 6 months</p>
+                <p className="text-sm mt-2">Add some transactions to see your financial trends</p>
               </div>
             ) : (
               <ResponsiveContainer width="100%" height={350}>
@@ -428,42 +498,6 @@ const Dashboard = () => {
                   </div>
                 </div>
               </div>
-            )}
-          </>
-        )}
-
-        {selectedChart === 'weekly' && (
-          <>
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">Weekly Spending Activity</h3>
-            {weeklyData.length === 0 || weeklyData.every(d => d.amount === 0) ? (
-              <div className="text-center py-12 text-gray-500">
-                <FaCalendarAlt className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-                <p>No expense data available for the last 7 days</p>
-                <p className="text-sm mt-2">Add some expenses to see your weekly spending pattern</p>
-              </div>
-            ) : (
-              <>
-                <ResponsiveContainer width="100%" height={350}>
-                  <BarChart data={weeklyData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="day" />
-                    <YAxis tickFormatter={(value) => `₹${value / 1000}k`} />
-                    <Tooltip 
-                      formatter={(value) => formatCurrency(value)}
-                      labelFormatter={(label, payload) => {
-                        if (payload && payload[0] && payload[0].payload) {
-                          return `${label} - ${payload[0].payload.displayDate}`;
-                        }
-                        return label;
-                      }}
-                    />
-                    <Bar dataKey="amount" fill="#3b82f6" radius={[8, 8, 0, 0]} name="Expense" />
-                  </BarChart>
-                </ResponsiveContainer>
-                <div className="mt-4 text-center text-sm text-gray-500">
-                  Total this week: {formatCurrency(weeklyData.reduce((sum, d) => sum + d.amount, 0))}
-                </div>
-              </>
             )}
           </>
         )}

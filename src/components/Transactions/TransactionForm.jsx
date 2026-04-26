@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { FaTimes, FaImage, FaTrash } from 'react-icons/fa';
+import React, { useState, useEffect, useRef } from 'react';
+import { FaTimes, FaInfoCircle, FaImage, FaTrash } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 
 const TransactionForm = ({ isOpen, onClose, onSubmit, projects, budgetCategories = [] }) => {
   const [formData, setFormData] = useState({
-    title: '',      // TITLE IS REQUIRED - ADD THIS
     amount: '',
     type: 'expense',
     category: '',
@@ -13,13 +12,15 @@ const TransactionForm = ({ isOpen, onClose, onSubmit, projects, budgetCategories
     receiver: '',
     date: new Date().toISOString().split('T')[0]
   });
-  const [screenshot, setScreenshot] = useState(null);
-  const [screenshotPreview, setScreenshotPreview] = useState(null);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const fileInputRef = useRef(null);
 
+  // EXACT categories from your backend validation
   const expenseCategories = [
-    'Food', 'Travel', 'Shopping', 'Transport', 'Bills',
-    'Education', 'Entertainment', 'Healthcare', 'Other'
+    'Food', 'Travel', 'Shopping', 'Transport',
+    'Bills', 'Education', 'Entertainment', 'Healthcare', 'Other'
   ];
 
   const incomeCategories = ['Salary', 'Business', 'Investment', 'Other'];
@@ -27,33 +28,43 @@ const TransactionForm = ({ isOpen, onClose, onSubmit, projects, budgetCategories
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+    
+    // Clear category when type changes
     if (name === 'type') {
       setFormData(prev => ({ ...prev, type: value, category: '' }));
     }
   };
 
-  const handleScreenshotChange = (e) => {
+  const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      // Validate file type
       const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
       if (!allowedTypes.includes(file.type)) {
-        toast.error('Only JPEG, PNG, WEBP images are allowed');
+        toast.error('Please upload a valid image (JPEG, PNG, WEBP)');
         return;
       }
+      
+      // Validate file size (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
         toast.error('File size must be less than 5MB');
         return;
       }
-      setScreenshot(file);
-      setScreenshotPreview(URL.createObjectURL(file));
+      
+      setSelectedFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
-  const removeScreenshot = () => {
-    setScreenshot(null);
-    if (screenshotPreview) {
-      URL.revokeObjectURL(screenshotPreview);
-      setScreenshotPreview(null);
+  const removeImage = () => {
+    setSelectedFile(null);
+    setImagePreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
     }
   };
 
@@ -61,51 +72,49 @@ const TransactionForm = ({ isOpen, onClose, onSubmit, projects, budgetCategories
     e.preventDefault();
     setIsSubmitting(true);
     
-    // Validate required fields
-    if (!formData.title || formData.title.trim() === '') {
-      toast.error('Please enter a title');
-      setIsSubmitting(false);
-      return;
-    }
-    
+    // Validate amount
     if (!formData.amount || parseFloat(formData.amount) <= 0) {
       toast.error('Please enter a valid amount');
       setIsSubmitting(false);
       return;
     }
     
+    // Validate category
     if (!formData.category) {
       toast.error('Please select a category');
       setIsSubmitting(false);
       return;
     }
     
-    // Create FormData for multipart/form-data (for file upload)
+    // Validate date
+    if (!formData.date) {
+      toast.error('Please select a date');
+      setIsSubmitting(false);
+      return;
+    }
+    
+    // Create FormData for file upload
     const submitData = new FormData();
-    submitData.append('title', formData.title);
     submitData.append('amount', Number(formData.amount));
     submitData.append('type', formData.type);
     submitData.append('category', formData.category);
-    submitData.append('date', formData.date);
-    if (formData.note) submitData.append('note', formData.note);
-    if (formData.type === 'income' && formData.receiver) submitData.append('receiver', formData.receiver);
-    if (formData.project && formData.project !== '') submitData.append('project', formData.project);
-    if (screenshot) submitData.append('screenshot', screenshot);
+    submitData.append('date', new Date(formData.date).toISOString());
     
-    console.log('Submitting transaction with data:', {
-      title: formData.title,
-      amount: formData.amount,
-      type: formData.type,
-      category: formData.category,
-      hasScreenshot: !!screenshot
-    });
+    if (formData.note) submitData.append('note', formData.note);
+    if (formData.type === 'income' && formData.receiver) {
+      submitData.append('receiver', formData.receiver);
+    }
+    if (formData.project && formData.project !== '') {
+      submitData.append('project', formData.project);
+    }
+    if (selectedFile) {
+      submitData.append('screenshot', selectedFile);
+    }
     
     try {
       await onSubmit(submitData);
-      toast.success('Transaction created successfully!');
       // Reset form on success
       setFormData({
-        title: '',
         amount: '',
         type: 'expense',
         category: '',
@@ -114,24 +123,20 @@ const TransactionForm = ({ isOpen, onClose, onSubmit, projects, budgetCategories
         receiver: '',
         date: new Date().toISOString().split('T')[0]
       });
-      removeScreenshot();
+      removeImage();
       onClose();
     } catch (error) {
       console.error('Submit failed:', error);
-      if (error.response?.status === 403) {
-        toast.error('Access denied. Admin or Finance Manager only.');
-      } else {
-        toast.error(error.response?.data?.message || 'Failed to create transaction');
-      }
+      toast.error(error.response?.data?.message || 'Failed to create transaction');
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  // Reset form when modal closes
   useEffect(() => {
     if (!isOpen) {
       setFormData({
-        title: '',
         amount: '',
         type: 'expense',
         category: '',
@@ -140,13 +145,14 @@ const TransactionForm = ({ isOpen, onClose, onSubmit, projects, budgetCategories
         receiver: '',
         date: new Date().toISOString().split('T')[0]
       });
-      removeScreenshot();
+      removeImage();
     }
   }, [isOpen]);
 
   if (!isOpen) return null;
 
   const currentCategories = formData.type === 'income' ? incomeCategories : expenseCategories;
+  const isExpense = formData.type === 'expense';
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -162,22 +168,6 @@ const TransactionForm = ({ isOpen, onClose, onSubmit, projects, budgetCategories
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Title - REQUIRED */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Title <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              name="title"
-              value={formData.title}
-              onChange={handleChange}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-              placeholder="e.g., Grocery Shopping, Salary, Electricity Bill"
-              required
-            />
-          </div>
-
           {/* Transaction Type */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Type</label>
@@ -233,79 +223,109 @@ const TransactionForm = ({ isOpen, onClose, onSubmit, projects, budgetCategories
                 <option key={cat} value={cat}>{cat}</option>
               ))}
             </select>
+            <p className="text-xs text-gray-500 mt-1">
+              {isExpense 
+                ? 'Expense categories: Food, Travel, Shopping, Transport, Bills, Education, Entertainment, Healthcare, Other'
+                : 'Income categories: Salary, Business, Investment, Other'}
+            </p>
           </div>
 
-          {/* Project */}
+          {/* Project (Optional) */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Project (Optional)</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Project (Optional)
+            </label>
             <select
               name="project"
               value={formData.project}
               onChange={handleChange}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
             >
               <option value="">No project</option>
               {projects.map((project) => (
-                <option key={project._id} value={project._id}>{project.name}</option>
+                <option key={project._id} value={project._id}>
+                  {project.name}
+                </option>
               ))}
             </select>
           </div>
 
-          {/* Note */}
+          {/* Screenshot/Receipt Upload */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Note (Optional)</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Receipt/Screenshot (Optional)
+            </label>
+            <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-blue-500 transition-colors cursor-pointer"
+                 onClick={() => fileInputRef.current?.click()}>
+              <div className="space-y-1 text-center">
+                {imagePreview ? (
+                  <div className="relative">
+                    <img src={imagePreview} alt="Preview" className="mx-auto h-32 w-auto rounded-lg object-cover" />
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        removeImage();
+                      }}
+                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                    >
+                      <FaTrash className="w-3 h-3" />
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <FaImage className="mx-auto h-12 w-12 text-gray-400" />
+                    <div className="flex text-sm text-gray-600">
+                      <label className="relative cursor-pointer rounded-md font-medium text-blue-600 hover:text-blue-500">
+                        <span>Upload a file</span>
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          className="sr-only"
+                          accept="image/*"
+                          onChange={handleFileChange}
+                        />
+                      </label>
+                      <p className="pl-1">or drag and drop</p>
+                    </div>
+                    <p className="text-xs text-gray-500">PNG, JPG, JPEG up to 5MB</p>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Note/Description */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Note (Optional)
+            </label>
             <textarea
               name="note"
               value={formData.note}
               onChange={handleChange}
               rows="2"
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 resize-none"
-              placeholder="Add a note about this transaction"
+              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none resize-none"
+              placeholder="Add additional details"
             />
           </div>
 
-          {/* Receiver - Only for income */}
+          {/* Receiver - Only for income transactions */}
           {formData.type === 'income' && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Receiver / Source (Optional)</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Receiver / Source (Optional)
+              </label>
               <input
                 type="text"
                 name="receiver"
                 value={formData.receiver}
                 onChange={handleChange}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                 placeholder="e.g., Company Name, Client, etc."
               />
             </div>
           )}
-
-          {/* Screenshot Upload */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Screenshot / Receipt (Optional)
-            </label>
-            <div className="flex items-center gap-3">
-              <label className="cursor-pointer bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg transition-colors flex items-center gap-2">
-                <FaImage className="w-4 h-4" />
-                Choose File
-                <input
-                  type="file"
-                  accept="image/jpeg,image/png,image/jpg,image/webp"
-                  onChange={handleScreenshotChange}
-                  className="hidden"
-                />
-              </label>
-              <span className="text-xs text-gray-500">Max 5MB (JPG, PNG, WEBP)</span>
-            </div>
-            {screenshotPreview && (
-              <div className="mt-3 relative inline-block">
-                <img src={screenshotPreview} alt="Preview" className="w-32 h-32 object-cover rounded-lg border border-gray-200" />
-                <button type="button" onClick={removeScreenshot} className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600">
-                  <FaTrash className="w-3 h-3" />
-                </button>
-              </div>
-            )}
-          </div>
 
           {/* Date */}
           <div>
@@ -317,7 +337,7 @@ const TransactionForm = ({ isOpen, onClose, onSubmit, projects, budgetCategories
               name="date"
               value={formData.date}
               onChange={handleChange}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
               required
             />
           </div>
@@ -325,7 +345,7 @@ const TransactionForm = ({ isOpen, onClose, onSubmit, projects, budgetCategories
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all font-medium shadow-md disabled:opacity-50"
+            className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all font-medium shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isSubmitting ? 'Creating...' : 'Add Transaction'}
           </button>

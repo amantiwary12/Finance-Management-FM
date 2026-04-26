@@ -1,7 +1,6 @@
 import React, { createContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import api from '../services/api';
 
 export const AuthContext = createContext(null);
 
@@ -18,23 +17,32 @@ export const AuthProvider = ({ children }) => {
       console.log('Auth init - Token:', token ? 'Present' : 'Missing');
       
       if (token && storedUser) {
-        // Use stored user data immediately
         try {
+          // Use stored user data immediately
           setUser(JSON.parse(storedUser));
           
-          // Verify token in background (don't block UI)
-          const response = await api.get('/auth/me');
-          console.log('Token verified, user:', response.data);
-          setUser(response.data);
-          localStorage.setItem('user', JSON.stringify(response.data));
-        } catch (error) {
-          console.error('Token verification failed:', error);
-          // Don't clear token on network errors
-          if (error.response?.status === 401) {
+          // Verify token with backend
+          const response = await fetch('http://localhost:8000/api/auth/me', {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          
+          const data = await response.json();
+          
+          if (data.success && data.user) {
+            console.log('Token verified, user:', data.user);
+            setUser(data.user);
+            localStorage.setItem('user', JSON.stringify(data.user));
+          } else {
+            console.log('Token invalid, clearing storage');
             localStorage.removeItem('token');
             localStorage.removeItem('user');
             setUser(null);
           }
+        } catch (error) {
+          console.error('Auth verification error:', error);
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          setUser(null);
         }
       }
       setLoading(false);
@@ -45,42 +53,78 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (mobileNumber, password) => {
     try {
-      console.log('Attempting login...');
-      const response = await api.post('/auth/login', { mobileNumber, password });
-      const { token, user: userData } = response.data;
-      
-      console.log('Login successful');
-      
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(userData));
-      setUser(userData);
-      
-      toast.success('Login successful!');
-      navigate('/dashboard');
-      return true;
+      const response = await fetch('http://localhost:8000/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mobileNumber, password }),
+      });
+
+      const data = await response.json();
+      console.log('Login response:', data);
+
+      if (data.token) {
+        // Store token
+        localStorage.setItem('token', data.token);
+        
+        // Store user data (from login response)
+        if (data.user) {
+          localStorage.setItem('user', JSON.stringify(data.user));
+          setUser(data.user);
+        } else {
+          // If user not in login response, fetch from /me
+          const meResponse = await fetch('http://localhost:8000/api/auth/me', {
+            headers: { 'Authorization': `Bearer ${data.token}` }
+          });
+          const meData = await meResponse.json();
+          if (meData.success && meData.user) {
+            localStorage.setItem('user', JSON.stringify(meData.user));
+            setUser(meData.user);
+          }
+        }
+        
+        toast.success('Login successful!');
+        navigate('/dashboard');
+        return true;
+      } else {
+        toast.error(data.message || 'Login failed');
+        return false;
+      }
     } catch (error) {
       console.error('Login error:', error);
-      toast.error(error.response?.data?.message || 'Login failed');
+      toast.error('Login failed. Please try again.');
       return false;
     }
   };
 
   const register = async (userData) => {
     try {
-      console.log('Attempting registration...');
-      const response = await api.post('/auth/register', userData);
-      const { token, user: newUser } = response.data;
-      
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(newUser));
-      setUser(newUser);
-      
-      toast.success('Registration successful!');
-      navigate('/dashboard');
-      return true;
+      const response = await fetch('http://localhost:8000/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(userData),
+      });
+
+      const data = await response.json();
+      console.log('Register response:', data);
+
+      if (data.token) {
+        localStorage.setItem('token', data.token);
+        
+        if (data.user) {
+          localStorage.setItem('user', JSON.stringify(data.user));
+          setUser(data.user);
+        }
+        
+        toast.success('Registration successful!');
+        navigate('/dashboard');
+        return true;
+      } else {
+        toast.error(data.message || 'Registration failed');
+        return false;
+      }
     } catch (error) {
       console.error('Register error:', error);
-      toast.error(error.response?.data?.message || 'Registration failed');
+      toast.error('Registration failed. Please try again.');
       return false;
     }
   };

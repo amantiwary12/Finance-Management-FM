@@ -1,25 +1,14 @@
 import api from './api';
 
 const transactionService = {
-  // CREATE transaction with optional screenshot
   createTransaction: (data) => {
-    // Check if data is FormData (has file) or regular object
     if (data instanceof FormData) {
-      console.log("Creating transaction with FormData (includes screenshot)");
-      // Log all FormData entries for debugging
-      for (let pair of data.entries()) {
-        console.log(pair[0], pair[1]);
-      }
       return api.post("/transactions", data, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
+        headers: { "Content-Type": "multipart/form-data" },
       });
     }
 
-    // Regular JSON data (no screenshot)
     const backendData = {
-      title: data.title,  // TITLE IS REQUIRED!
       amount: Number(data.amount),
       type: data.type,
       category: data.category,
@@ -29,21 +18,18 @@ const transactionService = {
       project: data.project || undefined,
     };
 
-    // Remove undefined fields
     Object.keys(backendData).forEach((key) => {
       if (backendData[key] === undefined || backendData[key] === '') {
         delete backendData[key];
       }
     });
 
-    console.log("Creating transaction with JSON data:", backendData);
+    console.log('Creating transaction with JSON:', backendData);
     return api.post("/transactions", backendData);
   },
 
-  // UPDATE transaction
   updateTransaction: (id, data) => {
     if (data instanceof FormData) {
-      console.log(`Updating transaction ${id} with FormData`);
       return api.put(`/transactions/${id}`, data, {
         headers: { "Content-Type": "multipart/form-data" },
       });
@@ -51,28 +37,34 @@ const transactionService = {
     return api.put(`/transactions/${id}`, data);
   },
 
-  // GET all transactions
   getTransactions: (params) => {
-    console.log("Fetching transactions with params:", params);
-    return api.get("/transactions", { params });
+    console.log('Fetching transactions with params:', params);
+    const queryParams = {};
+    if (params.type) queryParams.type = params.type;
+    if (params.category) queryParams.category = params.category;
+    if (params.project) queryParams.project = params.project;
+    if (params.userId) queryParams.userId = params.userId;
+    if (params.page) queryParams.page = params.page;
+    if (params.limit) queryParams.limit = params.limit;
+    if (params.startDate) queryParams.startDate = params.startDate;
+    if (params.endDate) queryParams.endDate = params.endDate;
+    
+    return api.get("/transactions", { params: queryParams });
   },
 
-  // GET daily expenses for charts
-  getDailyExpenses: (startDate, endDate) => {
-    console.log(`Fetching daily expenses from ${startDate} to ${endDate}`);
-    return api.get("/transactions/daily-expenses", { params: { startDate, endDate } });
-  },
-
-  // DELETE single transaction
   deleteTransaction: (id) => {
-    console.log("Deleting transaction:", id);
+    console.log(`Deleting transaction: ${id}`);
     return api.delete(`/transactions/${id}`);
   },
 
-  // DELETE all transactions (Admin only)
   clearAllTransactions: () => {
-    console.log("Clearing all transactions");
+    console.log('Clearing ALL transactions');
     return api.delete("/transactions/clear");
+  },
+
+  exportTransactions: (params) => {
+    console.log('Exporting transactions with params:', params);
+    return api.get("/transactions/export", { params, responseType: 'blob' });
   },
 };
 
