@@ -27,6 +27,7 @@ const Dashboard = () => {
   const [recentTransactions, setRecentTransactions] = useState([]);
   const [monthlyData, setMonthlyData] = useState([]);
   const [categoryData, setCategoryData] = useState([]);
+  const [weeklyData, setWeeklyData] = useState([]);
   const [weeklySummary, setWeeklySummary] = useState(null);
   const [monthlySummary, setMonthlySummary] = useState(null);
   const [budgetStatus, setBudgetStatus] = useState(null);
@@ -107,10 +108,11 @@ const Dashboard = () => {
         setBudgetStatus(budgetsRes.data);
       }
 
-      // Fetch weekly and monthly summaries
+      // Fetch weekly summary, monthly summary, and trend
       await fetchWeeklySummary();
       await fetchMonthlySummary();
       await fetchMonthlyTrend();
+      await fetchWeeklyChartData(); // Using correct daily-expenses endpoint
 
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
@@ -120,70 +122,100 @@ const Dashboard = () => {
     }
   };
 
-  // ✅ FIXED: Using the correct endpoint
+  // Fetch weekly summary (text summary)
   const fetchWeeklySummary = async () => {
     try {
-      const token = localStorage.getItem('token');
-      console.log('Fetching weekly summary from: /api/transactions/weekly-summary');
-      
-      const response = await fetch('http://localhost:8000/api/transactions/weekly-summary', {
-        method: 'GET',
-        headers: { 
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Weekly summary response:', data);
-        setWeeklySummary(data);
-      } else {
-        console.error('Weekly summary failed with status:', response.status);
-        setWeeklySummary(null);
-      }
+      console.log('Fetching weekly summary...');
+      const response = await transactionService.getWeeklySummary();
+      console.log('Weekly summary response:', response.data);
+      setWeeklySummary(response.data);
     } catch (error) {
       console.error('Error fetching weekly summary:', error);
       setWeeklySummary(null);
     }
   };
 
-  // ✅ FIXED: Using the correct endpoint with month and year
+  // Fetch monthly summary
   const fetchMonthlySummary = async () => {
     try {
-      const token = localStorage.getItem('token');
       const now = new Date();
       const month = now.getMonth() + 1;
       const year = now.getFullYear();
       
-      console.log(`Fetching monthly summary from: /api/transactions/monthly-summary?month=${month}&year=${year}`);
-      
-      const response = await fetch(`http://localhost:8000/api/transactions/monthly-summary?month=${month}&year=${year}`, {
-        method: 'GET',
-        headers: { 
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Monthly summary response:', data);
-        setMonthlySummary(data);
-      } else {
-        console.error('Monthly summary failed with status:', response.status);
-        setMonthlySummary(null);
-      }
+      console.log(`Fetching monthly summary for ${month}/${year}...`);
+      const response = await transactionService.getMonthlySummary(month, year);
+      console.log('Monthly summary response:', response.data);
+      setMonthlySummary(response.data);
     } catch (error) {
       console.error('Error fetching monthly summary:', error);
       setMonthlySummary(null);
     }
   };
 
-  // ✅ FIXED: Fetch monthly trend for last 6 months
+  // ✅ FIXED: Using the correct /daily-expenses endpoint
+  const fetchWeeklyChartData = async () => {
+    try {
+      const now = new Date();
+      const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+      
+      // Get start of week (Monday)
+      const startOfWeek = new Date(now);
+      const day = now.getDay();
+      const diff = now.getDate() - day + (day === 0 ? -6 : 1);
+      startOfWeek.setDate(diff);
+      startOfWeek.setHours(0, 0, 0, 0);
+      
+      // Get end of week (Sunday)
+      const endOfWeek = new Date(startOfWeek);
+      endOfWeek.setDate(startOfWeek.getDate() + 6);
+      endOfWeek.setHours(23, 59, 59, 999);
+      
+      console.log(`Fetching daily expenses from ${startOfWeek.toISOString()} to ${endOfWeek.toISOString()}`);
+      
+      // ✅ Using the correct endpoint: /api/transactions/daily-expenses
+      const response = await transactionService.getDailyExpenses(
+        startOfWeek.toISOString(), 
+        endOfWeek.toISOString()
+      );
+      
+      console.log('Daily expenses response:', response.data);
+      
+      // Process the response data
+      if (response.data && response.data.data && response.data.data.length > 0) {
+        // Map daily data to days of week
+        const dailyMap = {};
+        response.data.data.forEach(item => {
+          const date = new Date(item._id);
+          const dayIndex = date.getDay(); // 0 = Sunday, 1 = Monday, etc.
+          // Convert to Monday-based index (0 = Monday)
+          const mondayIndex = dayIndex === 0 ? 6 : dayIndex - 1;
+          dailyMap[mondayIndex] = item.total;
+        });
+        
+        // Create weekly data array
+        const weeklyChartData = days.map((day, index) => ({
+          day,
+          amount: dailyMap[index] || 0
+        }));
+        
+        console.log('Weekly chart data:', weeklyChartData);
+        setWeeklyData(weeklyChartData);
+      } else {
+        // If no data, show zeros
+        const weeklyChartData = days.map(day => ({ day, amount: 0 }));
+        setWeeklyData(weeklyChartData);
+      }
+    } catch (error) {
+      console.error('Error fetching weekly chart data:', error);
+      // Set empty data on error
+      const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+      setWeeklyData(days.map(day => ({ day, amount: 0 })));
+    }
+  };
+
+  // Fetch monthly trend for last 6 months
   const fetchMonthlyTrend = async () => {
     try {
-      const token = localStorage.getItem('token');
       const months = [];
       const currentDate = new Date();
       const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -195,32 +227,15 @@ const Dashboard = () => {
         const year = date.getFullYear();
         const monthName = monthNames[date.getMonth()];
         
-        console.log(`Fetching monthly data for: month=${month}, year=${year}`);
+        console.log(`Fetching monthly data for ${month}/${year}...`);
+        const response = await transactionService.getMonthlySummary(month, year);
         
-        const response = await fetch(`http://localhost:8000/api/transactions/monthly-summary?month=${month}&year=${year}`, {
-          method: 'GET',
-          headers: { 
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
+        months.push({
+          name: `${monthName} ${year.toString().slice(-2)}`,
+          income: response.data.income || 0,
+          expense: response.data.expense || 0,
+          savings: (response.data.income || 0) - (response.data.expense || 0)
         });
-        
-        if (response.ok) {
-          const data = await response.json();
-          months.push({
-            name: `${monthName} ${year.toString().slice(-2)}`,
-            income: data.income || 0,
-            expense: data.expense || 0,
-            savings: (data.income || 0) - (data.expense || 0)
-          });
-        } else {
-          months.push({
-            name: `${monthName} ${year.toString().slice(-2)}`,
-            income: 0,
-            expense: 0,
-            savings: 0
-          });
-        }
       }
       
       console.log('Monthly trend data:', months);
@@ -299,7 +314,7 @@ const Dashboard = () => {
           <div>
             <h2 className="text-2xl font-bold">Financial Dashboard</h2>
             <p className="text-blue-100 mt-1">
-              {userRole === 'Admin' ? 'Admin View - All Transactions' : 'Your Financial Overview'}
+              {userRole === 'Admin' || userRole === 'FinanceManager' ? 'Admin View - All Transactions' : 'Your Financial Overview'}
               for {new Date().toLocaleString('default', { month: 'long', year: 'numeric' })}
             </p>
           </div>
@@ -327,9 +342,9 @@ const Dashboard = () => {
         ))}
       </div>
 
-      {/* Weekly & Monthly Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Weekly Summary Card */}
+      {/* Weekly Summary Cards + Graph */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Weekly Summary Stats Card */}
         <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
           <div className="flex items-center gap-2 mb-4">
             <FaCalendarWeek className="w-5 h-5 text-blue-500" />
@@ -357,7 +372,33 @@ const Dashboard = () => {
           )}
         </div>
 
-        {/* Monthly Summary Card */}
+        {/* Weekly Spending Graph - Using REAL data from daily-expenses */}
+        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+          <div className="flex items-center gap-2 mb-4">
+            <FaChartLine className="w-5 h-5 text-green-500" />
+            <h3 className="text-lg font-semibold text-gray-800">Weekly Spending Trend</h3>
+          </div>
+          {weeklyData.length === 0 || weeklyData.every(d => d.amount === 0) ? (
+            <div className="text-center py-8 text-gray-500">
+              <p>No spending data for this week</p>
+              <p className="text-sm mt-1">Add expense transactions to see your weekly trend</p>
+            </div>
+          ) : (
+            <ResponsiveContainer width="100%" height={250}>
+              <BarChart data={weeklyData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="day" />
+                <YAxis tickFormatter={(value) => `₹${value / 1000}k`} />
+                <Tooltip formatter={(value) => formatCurrency(value)} />
+                <Bar dataKey="amount" fill="#3b82f6" radius={[8, 8, 0, 0]} name="Expense" />
+              </BarChart>
+            </ResponsiveContainer>
+          )}
+        </div>
+      </div>
+
+      {/* Monthly Summary and Budget Overview */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
           <div className="flex items-center gap-2 mb-4">
             <FaCalendarAlt className="w-5 h-5 text-purple-500" />
@@ -384,6 +425,8 @@ const Dashboard = () => {
             <p className="text-gray-500 text-center py-4">No transactions this month</p>
           )}
         </div>
+
+        <BudgetOverview />
       </div>
 
       {/* Budget Alerts */}
@@ -503,11 +546,8 @@ const Dashboard = () => {
         )}
       </div>
 
-      {/* Bottom Section - Transactions and Budget */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <RecentTransactions transactions={recentTransactions} />
-        <BudgetOverview />
-      </div>
+      {/* Bottom Section - Transactions */}
+      <RecentTransactions transactions={recentTransactions} />
 
       {/* Quick Tips */}
       <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-5">

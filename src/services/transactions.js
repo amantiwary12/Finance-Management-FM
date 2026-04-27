@@ -52,6 +52,31 @@ const transactionService = {
     return api.get("/transactions", { params: queryParams });
   },
 
+  // ✅ ADD THIS - Get daily expenses for weekly chart
+  getDailyExpenses: async (startDate, endDate) => {
+    console.log(`📊 Fetching daily expenses from ${startDate} to ${endDate}`);
+    const response = await api.get('/transactions/daily-expenses', { 
+      params: { startDate, endDate } 
+    });
+    return response;
+  },
+
+  // ✅ ADD THIS - Weekly summary
+  getWeeklySummary: async () => {
+    console.log('📊 Fetching weekly summary');
+    const response = await api.get('/transactions/weekly-summary');
+    return response;
+  },
+
+  // ✅ ADD THIS - Monthly summary
+  getMonthlySummary: async (month, year) => {
+    console.log(`📊 Fetching monthly summary for ${month}/${year}`);
+    const response = await api.get('/transactions/monthly-summary', { 
+      params: { month, year } 
+    });
+    return response;
+  },
+
   deleteTransaction: (id) => {
     console.log(`Deleting transaction: ${id}`);
     return api.delete(`/transactions/${id}`);

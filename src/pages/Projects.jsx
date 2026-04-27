@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FaPlus, FaTrash } from 'react-icons/fa';
+import { FaPlus, FaTrash, FaUpload, FaEye } from 'react-icons/fa';
 import projectService from '../services/projects';
+import ImportModal from '../components/Projects/ImportModal';
 import toast from 'react-hot-toast';
 import { formatCurrency } from '../utils/formatters';
 
@@ -8,6 +9,8 @@ const Projects = () => {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [selectedProjectForImport, setSelectedProjectForImport] = useState(null);
   const [statusFilter, setStatusFilter] = useState('all');
   const fetchCalled = useRef(false);
 
@@ -75,6 +78,12 @@ const Projects = () => {
     }
   };
 
+  const handleImportSuccess = () => {
+    toast.success('Transactions imported successfully!');
+    // Refresh projects or show updated data
+    fetchProjects();
+  };
+
   const getStatusColor = (status) => {
     const colors = {
       active: 'bg-green-100 text-green-600',
@@ -88,6 +97,11 @@ const Projects = () => {
   const filteredProjects = projects.filter(project =>
     statusFilter === 'all' ? true : project.status === statusFilter
   );
+
+  const openImportModal = (project) => {
+    setSelectedProjectForImport(project);
+    setIsImportModalOpen(true);
+  };
 
   if (loading) {
     return <div className="text-center py-12">Loading projects...</div>;
@@ -133,7 +147,15 @@ const Projects = () => {
         {filteredProjects.map((project) => (
           <div key={project._id} className="bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow p-6">
             <div className="flex justify-between items-start mb-4">
-              <h3 className="text-lg font-semibold text-gray-800">{project.name}</h3>
+              <div className="flex-1">
+                <div className="flex items-center gap-2">
+                  <h3 className="text-lg font-semibold text-gray-800">{project.name}</h3>
+                  {project.status === 'active' && (
+                    <span className="px-2 py-0.5 text-xs bg-green-100 text-green-600 rounded-full">Active</span>
+                  )}
+                </div>
+                <p className="text-xs text-gray-400 mt-1">ID: {project._id}</p>
+              </div>
               <select
                 value={project.status}
                 onChange={(e) => handleUpdateStatus(project._id, e.target.value)}
@@ -159,12 +181,20 @@ const Projects = () => {
               </div>
             </div>
 
-            <div className="flex justify-end gap-2 pt-4 border-t">
+            <div className="flex justify-between gap-2 pt-4 border-t">
+              <button
+                onClick={() => openImportModal(project)}
+                className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg flex items-center justify-center gap-2 transition-colors text-sm"
+              >
+                <FaUpload className="w-3 h-3" />
+                Import Data
+              </button>
               <button
                 onClick={() => handleDeleteProject(project._id)}
-                className="text-red-600 hover:text-red-700 p-2"
+                className="text-red-600 hover:bg-red-50 p-2 rounded-lg transition-colors"
+                title="Delete project"
               >
-                <FaTrash />
+                <FaTrash className="w-4 h-4" />
               </button>
             </div>
           </div>
@@ -182,6 +212,19 @@ const Projects = () => {
         <ProjectModal
           onClose={() => setIsModalOpen(false)}
           onSubmit={handleCreateProject}
+        />
+      )}
+
+      {/* Import Modal */}
+      {isImportModalOpen && selectedProjectForImport && (
+        <ImportModal
+          isOpen={isImportModalOpen}
+          onClose={() => {
+            setIsImportModalOpen(false);
+            setSelectedProjectForImport(null);
+          }}
+          project={selectedProjectForImport}
+          onSuccess={handleImportSuccess}
         />
       )}
     </div>
