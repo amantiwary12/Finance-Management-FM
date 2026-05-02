@@ -3,7 +3,7 @@ import { FaTimes, FaUpload, FaFileExcel, FaCheckCircle, FaExclamationTriangle, F
 import toast from 'react-hot-toast';
 import importService from '../../services/import';
 
-const ImportModal = ({ isOpen, onClose, project, onSuccess }) => {
+const ImportProjectData = ({ isOpen, onClose, project, onSuccess }) => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(null);
@@ -100,27 +100,27 @@ const ImportModal = ({ isOpen, onClose, project, onSuccess }) => {
     }
   };
 
-  const downloadSampleTemplate = () => {
-    const sampleData = [
-      ['Date', 'Type', 'Category', 'Amount', 'Receiver', 'Note'],
-      ['2026-04-01', 'expense', 'Cement', '5000', 'ABC Supplier', 'Site work'],
-      ['2026-04-02', 'income', 'Client Payment', '20000', 'XYZ Client', 'Advance'],
-      ['2026-04-03', 'expense', 'Labor', '3000', 'Contractor', 'Daily wages'],
-      ['2026-04-05', 'expense', 'Transport', '1500', 'Logistics', 'Material delivery'],
-    ];
-    
-    let csvContent = sampleData.map(row => row.join(',')).join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `sample_transactions_${project?.name || 'project'}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    toast.success('Sample template downloaded');
-  };
+ const downloadSampleTemplate = () => {
+  const sampleData = [
+    ['Date', 'Type', 'Category', 'Amount', 'Receiver', 'Note'],
+    ['2026-04-01', 'expense', 'Cement', '5000', 'ABC Supplier', 'Site work'],
+    ['2026-04-02', 'income', 'Client Payment', '20000', 'XYZ Client', 'Advance'],
+    ['2026-04-03', 'expense', 'Labor', '3000', 'Contractor', 'Daily wages'],
+    ['2026-04-05', 'expense', 'Transport', '1500', 'Logistics', 'Material delivery'],
+  ];
+  
+  let csvContent = sampleData.map(row => row.join(',')).join('\n');
+  const blob = new Blob([csvContent], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `sample_transactions_${project?.name || 'project'}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast.success('Sample template downloaded');
+};
 
   if (!isOpen) return null;
 
@@ -271,4 +271,4 @@ const ImportModal = ({ isOpen, onClose, project, onSuccess }) => {
   );
 };
 
-export default ImportModal;
+export default ImportProjectData;

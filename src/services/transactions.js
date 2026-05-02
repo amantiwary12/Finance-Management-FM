@@ -65,22 +65,22 @@ const transactionService = {
     return api.put(`/transactions/${id}`, data);
   },
 
-  // ✅ This is the missing method causing the error
   getTransactions: (params) => {
     console.log('Fetching transactions with params:', params);
     const queryParams = {};
-    if (params?.type) queryParams.type = params.type;
-    if (params?.category) queryParams.category = params.category;
-    if (params?.project) queryParams.project = params.project;
-    if (params?.userId) queryParams.userId = params.userId;
-    if (params?.page) queryParams.page = params.page;
-    if (params?.limit) queryParams.limit = params.limit;
-    if (params?.startDate) queryParams.startDate = params.startDate;
-    if (params?.endDate) queryParams.endDate = params.endDate;
+    if (params.type) queryParams.type = params.type;
+    if (params.category) queryParams.category = params.category;
+    if (params.project) queryParams.project = params.project;
+    if (params.userId) queryParams.userId = params.userId;
+    if (params.page) queryParams.page = params.page;
+    if (params.limit) queryParams.limit = params.limit;
+    if (params.startDate) queryParams.startDate = params.startDate;
+    if (params.endDate) queryParams.endDate = params.endDate;
     
     return api.get("/transactions", { params: queryParams });
   },
 
+  // ✅ Get daily expenses for weekly chart
   getDailyExpenses: async (startDate, endDate) => {
     console.log(`📊 Fetching daily expenses from ${startDate} to ${endDate}`);
     const response = await api.get('/transactions/daily-expenses', { 
@@ -89,17 +89,29 @@ const transactionService = {
     return response;
   },
 
+  // ✅ Get weekly summary (income/expense totals for current week)
   getWeeklySummary: async () => {
     console.log('📊 Fetching weekly summary');
     const response = await api.get('/transactions/weekly-summary');
     return response;
   },
 
+  // ✅ Get monthly summary for specific month/year
   getMonthlySummary: async (month, year) => {
     console.log(`📊 Fetching monthly summary for ${month}/${year}`);
     const response = await api.get('/transactions/monthly-summary', { 
       params: { month, year } 
     });
+    return response;
+  },
+
+  // ✅ Get category summary for spending breakdown
+  getCategorySummary: async (startDate, endDate) => {
+    console.log(`📊 Fetching category summary`);
+    const params = {};
+    if (startDate) params.startDate = startDate;
+    if (endDate) params.endDate = endDate;
+    const response = await api.get('/transactions/category-summary', { params });
     return response;
   },
 

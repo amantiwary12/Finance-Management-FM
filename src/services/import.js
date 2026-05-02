@@ -7,11 +7,15 @@ const importService = {
     formData.append('projectId', projectId);
     formData.append('file', file);
     
+    console.log('Importing file for project:', projectId);
+    
     const response = await api.post('/import/import-project-data', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
+    
+    console.log('Import response:', response.data);
     return response;
   },
 };
 
-export default importService;   
+export default importService;

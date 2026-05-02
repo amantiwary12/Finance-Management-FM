@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { FaPlus, FaTrash, FaUpload, FaEye } from 'react-icons/fa';
 import projectService from '../services/projects';
-import ImportModal from '../components/Projects/ImportModal';
+import ImportModal from '../components/Projects/ImportProjectData';
 import toast from 'react-hot-toast';
 import { formatCurrency } from '../utils/formatters';
 

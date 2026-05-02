@@ -47,6 +47,13 @@ const projectService = {
     console.log('Deleting project with ID:', id);
     return api.delete(`/projects/${id}`);
   },
+  
+  // ✅ ADD THIS - Get project with progress data
+  getProjectWithProgress: async (id) => {
+    console.log(`📊 Fetching project progress for: ${id}`);
+    const response = await api.get(`/projects/${id}/progress`);
+    return response;
+  },
 };
 
 export default projectService;
