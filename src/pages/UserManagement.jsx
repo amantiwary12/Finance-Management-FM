@@ -3,9 +3,9 @@ import {
   FaPlus, FaEdit, FaTrash, FaEye, FaEyeSlash, 
   FaToggleOn, FaToggleOff, FaSync, FaSearch, 
   FaUserPlus, FaKey, FaCheck, FaTimes,
-  FaUser, FaPhone, FaBriefcase, FaCalendar
+  FaUser, FaPhone, FaBriefcase, FaCalendar, FaBuilding
 } from 'react-icons/fa';
-import userService from '../services/userService.js';
+import userService from '../services/userService';
 import toast from 'react-hot-toast';
 
 const UserManagement = () => {
@@ -22,6 +22,7 @@ const UserManagement = () => {
   const [resettingUser, setResettingUser] = useState(null);
   const [newPassword, setNewPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [currentUserRole, setCurrentUserRole] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
     mobileNumber: '',
@@ -29,10 +30,17 @@ const UserManagement = () => {
     role: 'Employee'
   });
 
-  const roles = ['Admin', 'Manager', 'Employee', 'Accountant'];
-  const statusOptions = ['active', 'inactive'];
+  // Roles matching backend enum
+  const roles = ['Admin', 'FinanceManager', 'Manager', 'Employee', 'Viewer'];
 
-  // Fetch all users
+  useEffect(() => {
+    // Get current logged-in user role
+    const currentUser = JSON.parse(localStorage.getItem('user'));
+    setCurrentUserRole(currentUser?.role);
+    fetchUsers();
+  }, []);
+
+  // Fetch all users (only same company - backend handles filtering)
   const fetchUsers = async () => {
     try {
       setLoading(true);
@@ -46,10 +54,6 @@ const UserManagement = () => {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    fetchUsers();
-  }, []);
 
   // Filter users
   const filteredUsers = users.filter(user => {
@@ -67,7 +71,7 @@ const UserManagement = () => {
     e.preventDefault();
     try {
       if (editingUser) {
-        // Update user
+        // Update user (only name and role can be updated)
         const updateData = {
           name: formData.name,
           role: formData.role
@@ -75,7 +79,7 @@ const UserManagement = () => {
         await userService.updateUser(editingUser._id, updateData);
         toast.success('User updated successfully');
       } else {
-        // Create user
+        // Create new user
         await userService.createUser(formData);
         toast.success('User created successfully');
       }
@@ -96,6 +100,13 @@ const UserManagement = () => {
 
   // Toggle user status (Activate/Deactivate)
   const handleToggleStatus = async (user) => {
+    // Prevent self deactivation
+    const currentUser = JSON.parse(localStorage.getItem('user'));
+    if (currentUser._id === user._id) {
+      toast.error('You cannot change your own status');
+      return;
+    }
+    
     try {
       await userService.updateUserStatus(user._id, !user.isActive);
       toast.success(`${user.name} ${!user.isActive ? 'activated' : 'deactivated'} successfully`);
@@ -127,6 +138,13 @@ const UserManagement = () => {
 
   // Delete user
   const handleDelete = async () => {
+    // Prevent self deletion
+    const currentUser = JSON.parse(localStorage.getItem('user'));
+    if (currentUser._id === deletingUser._id) {
+      toast.error('You cannot delete your own account');
+      return;
+    }
+    
     try {
       await userService.deleteUser(deletingUser._id);
       toast.success(`${deletingUser.name} deleted successfully`);
@@ -152,9 +170,10 @@ const UserManagement = () => {
   const getRoleColor = (role) => {
     const colors = {
       Admin: 'bg-purple-100 text-purple-700',
+      FinanceManager: 'bg-indigo-100 text-indigo-700',
       Manager: 'bg-blue-100 text-blue-700',
       Employee: 'bg-green-100 text-green-700',
-      Accountant: 'bg-orange-100 text-orange-700'
+      Viewer: 'bg-gray-100 text-gray-700'
     };
     return colors[role] || 'bg-gray-100 text-gray-700';
   };
@@ -176,7 +195,7 @@ const UserManagement = () => {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">User Management</h1>
-          <p className="text-gray-600 mt-1">Manage system users and their permissions</p>
+          <p className="text-gray-600 mt-1">Manage users within your company</p>
         </div>
         <button
           onClick={() => {
@@ -305,7 +324,7 @@ const UserManagement = () => {
                     </td>
                     <td className="py-4 px-6">
                       <div className="flex items-center justify-center gap-2">
-                        {/* Edit Button */}
+                        {/* Edit Button - Only if not editing self or allowed */}
                         <button
                           onClick={() => {
                             setEditingUser(user);

@@ -1,7 +1,7 @@
 import api from './api';
 
 const userService = {
-  // GET /api/users - Get all users
+  // GET /api/users - Get all users (only same company)
   getAllUsers: async () => {
     const response = await api.get('/users');
     return response;

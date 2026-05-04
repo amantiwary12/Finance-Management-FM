@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -6,7 +6,7 @@ import {
   Navigate,
 } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
-import { AuthProvider } from "./context/AuthContext";
+import { AuthProvider, AuthContext } from "./context/AuthContext";
 import { RoleProvider } from "./context/RoleContext";
 import { useNetworkStatus } from "./hooks/useNetworkStatus";
 import NetworkStatus from "./components/NetworkStatus";
@@ -20,11 +20,12 @@ import Budget from "./pages/Budget";
 import Notifications from "./pages/Notifications";
 import ProjectDetails from "./pages/ProjectDetails";
 import UserManagement from "./pages/UserManagement";
+// import NotFound from "./pages/NotFound"; // Create this component
 
-// Protected Route wrapper
+// Protected Route wrapper using AuthContext
 const ProtectedRoute = ({ children }) => {
+  const { user } = useContext(AuthContext);
   const token = localStorage.getItem("token");
-  const user = localStorage.getItem("user");
 
   if (!token || !user) {
     return <Navigate to="/login" replace />;
@@ -38,7 +39,15 @@ function AppContent() {
 
   return (
     <>
-      <Toaster position="top-right" />
+      <Toaster 
+        position="top-right" 
+        toastOptions={{
+          duration: 4000,
+          style: { background: '#363636', color: '#fff' },
+          success: { duration: 3000 },
+          error: { duration: 5000 },
+        }}
+      />
       <NetworkStatus isOnline={isOnline} wasOffline={wasOffline} />
       <Routes>
         <Route path="/login" element={<Login />} />
@@ -59,6 +68,7 @@ function AppContent() {
           <Route path="notifications" element={<Notifications />} />
           <Route path="projects/:id" element={<ProjectDetails />} />
           <Route path="users" element={<UserManagement />} />
+          {/* <Route path="*" element={<NotFound />} /> */}
         </Route>
       </Routes>
     </>
@@ -78,6 +88,3 @@ function App() {
 }
 
 export default App;
-
-
-
