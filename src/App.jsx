@@ -20,7 +20,10 @@ import Budget from "./pages/Budget";
 import Notifications from "./pages/Notifications";
 import ProjectDetails from "./pages/ProjectDetails";
 import UserManagement from "./pages/UserManagement";
-// import NotFound from "./pages/NotFound"; // Create this component
+import FormBuilder from "./pages/HR/FormBuilder";
+import FormList from "./pages/HR/FormList";
+import DynamicForm from "./pages/HR/DynamicForm";
+import Submissions from "./pages/HR/Submissions";
 
 // Protected Route wrapper using AuthContext
 const ProtectedRoute = ({ children }) => {
@@ -39,11 +42,11 @@ function AppContent() {
 
   return (
     <>
-      <Toaster 
-        position="top-right" 
+      <Toaster
+        position="top-right"
         toastOptions={{
           duration: 4000,
-          style: { background: '#363636', color: '#fff' },
+          style: { background: "#363636", color: "#fff" },
           success: { duration: 3000 },
           error: { duration: 5000 },
         }}
@@ -68,7 +71,10 @@ function AppContent() {
           <Route path="notifications" element={<Notifications />} />
           <Route path="projects/:id" element={<ProjectDetails />} />
           <Route path="users" element={<UserManagement />} />
-          {/* <Route path="*" element={<NotFound />} /> */}
+          <Route path="forms" element={<FormList />} />
+          <Route path="forms/builder" element={<FormBuilder />} />
+          <Route path="forms/:id" element={<DynamicForm />} />
+          <Route path="submissions" element={<Submissions />} />
         </Route>
       </Routes>
     </>

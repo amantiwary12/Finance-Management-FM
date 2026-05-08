@@ -12,11 +12,13 @@ import {
   FaUserCircle,
   FaUsers,
   FaBuilding,
+  FaFileAlt,
+  FaClipboardList,
 } from "react-icons/fa";
 
 const Sidebar = () => {
   const { user, company, logout } = useContext(AuthContext);
-  const { canManageUsers, userRole } = useRole(); // ✅ Use the optimized role checks
+  const { canManageUsers, userRole, isHR, isAdmin } = useRole();
 
   const menuItems = [
     { path: "/dashboard", icon: FaTachometerAlt, label: "Dashboard" },
@@ -31,6 +33,14 @@ const Sidebar = () => {
     menuItems.push({ path: "/users", icon: FaUsers, label: "User Management" });
   }
 
+  // Add HR/Form Management menu for HR, Admin, and FinanceManager
+  if (isHR() || isAdmin()) {
+    menuItems.push(
+      { path: "/forms", icon: FaFileAlt, label: "Forms" },
+      { path: "/submissions", icon: FaClipboardList, label: "Submissions" }
+    );
+  }
+
   const isActive = (path) => window.location.pathname === path;
 
   // Get role badge color
@@ -39,6 +49,7 @@ const Sidebar = () => {
       case 'Admin': return 'bg-red-500';
       case 'Manager': return 'bg-blue-500';
       case 'FinanceManager': return 'bg-purple-500';
+      case 'HR': return 'bg-pink-500';
       case 'Employee': return 'bg-green-500';
       case 'Viewer': return 'bg-gray-500';
       default: return 'bg-gray-500';

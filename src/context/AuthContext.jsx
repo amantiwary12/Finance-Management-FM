@@ -2,14 +2,13 @@ import React, { createContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
-// ✅ Get API URL from environment variable
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
 export const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [company, setCompany] = useState(null); // ✅ NEW - Store company info
+  const [company, setCompany] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -17,15 +16,17 @@ export const AuthProvider = ({ children }) => {
     const initAuth = async () => {
       const token = localStorage.getItem('token');
       const storedUser = localStorage.getItem('user');
-      const storedCompany = localStorage.getItem('company'); // ✅ NEW
+      const storedCompany = localStorage.getItem('company');
       
       console.log('Auth init - Token:', token ? 'Present' : 'Missing');
-      console.log('API URL:', API_URL);
+      console.log('Auth init - Stored user:', storedUser ? 'Present' : 'Missing');
       
       if (token && storedUser) {
         try {
           // Use stored data immediately
-          setUser(JSON.parse(storedUser));
+          const parsedUser = JSON.parse(storedUser);
+          setUser(parsedUser);
+          
           if (storedCompany) {
             setCompany(JSON.parse(storedCompany));
           }
@@ -43,9 +44,10 @@ export const AuthProvider = ({ children }) => {
             localStorage.setItem('user', JSON.stringify(data.user));
             
             // ✅ Store company if returned
-            if (data.company) {
-              setCompany(data.company);
-              localStorage.setItem('company', JSON.stringify(data.company));
+            if (data.user.company) {
+              setCompany(data.user.company);
+              localStorage.setItem('company', JSON.stringify(data.user.company));
+              console.log('Company set:', data.user.company);
             }
           } else {
             console.log('Token invalid, clearing storage');
@@ -57,11 +59,7 @@ export const AuthProvider = ({ children }) => {
           }
         } catch (error) {
           console.error('Auth verification error:', error);
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
-          localStorage.removeItem('company');
-          setUser(null);
-          setCompany(null);
+          // Don't clear storage on network error, keep existing data
         }
       }
       setLoading(false);
@@ -84,19 +82,16 @@ export const AuthProvider = ({ children }) => {
       console.log('Login response:', data);
 
       if (data.token) {
-        // Store token
         localStorage.setItem('token', data.token);
         
-        // Store user data
         if (data.user) {
           localStorage.setItem('user', JSON.stringify(data.user));
           setUser(data.user);
-        }
-        
-        // ✅ Store company data
-        if (data.company) {
-          localStorage.setItem('company', JSON.stringify(data.company));
-          setCompany(data.company);
+          
+          if (data.user.company) {
+            localStorage.setItem('company', JSON.stringify(data.user.company));
+            setCompany(data.user.company);
+          }
         }
         
         toast.success(`Welcome ${data.user?.name || 'User'}!`);
@@ -113,55 +108,60 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
- const register = async (userData) => {
-  try {
-    console.log('📝 Registering with data:', {
-      name: userData.name,
-      mobileNumber: userData.mobileNumber,
-      password: '***',
-      companyName: userData.companyName
-    });
-    
-    const response = await fetch(`${API_URL}/auth/register`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+  const register = async (userData) => {
+    try {
+      console.log('📝 Registering with data:', {
         name: userData.name,
         mobileNumber: userData.mobileNumber,
-        password: userData.password,
-        companyName: userData.companyName  // ✅ MUST match exactly
-      }),
-    });
-
-    const data = await response.json();
-    console.log('📦 Register response:', data);
-
-    if (data.token) {
-      localStorage.setItem('token', data.token);
+        password: '***',
+        companyName: userData.companyName
+      });
       
-      if (data.user) {
-        localStorage.setItem('user', JSON.stringify(data.user));
-        setUser(data.user);
+      const response = await fetch(`${API_URL}/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: userData.name,
+          mobileNumber: userData.mobileNumber,
+          password: userData.password,
+          companyName: userData.companyName
+        }),
+      });
+
+      const data = await response.json();
+      console.log('📦 Register response:', data);
+
+      if (data.token) {
+        localStorage.setItem('token', data.token);
+        
+        if (data.user) {
+          localStorage.setItem('user', JSON.stringify(data.user));
+          setUser(data.user);
+          
+          if (data.user.company) {
+            localStorage.setItem('company', JSON.stringify(data.user.company));
+            setCompany(data.user.company);
+          }
+        }
+        
+        toast.success(`Welcome ${data.user?.name}! Your company has been created.`);
+        navigate('/dashboard');
+        return true;
+      } else {
+        toast.error(data.message || 'Registration failed');
+        return false;
       }
-      
-      toast.success(`Welcome ${data.user?.name}! Your company has been created.`);
-      navigate('/dashboard');
-      return true;
-    } else {
-      toast.error(data.message || 'Registration failed');
+    } catch (error) {
+      console.error('❌ Register error:', error);
+      toast.error('Registration failed. Please try again.');
       return false;
     }
-  } catch (error) {
-    console.error('❌ Register error:', error);
-    toast.error('Registration failed. Please try again.');
-    return false;
-  }
-};
+  };
 
   const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    localStorage.removeItem('company'); // ✅ NEW
+    localStorage.removeItem('company');
     setUser(null);
     setCompany(null);
     navigate('/login');

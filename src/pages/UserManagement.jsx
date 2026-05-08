@@ -30,8 +30,8 @@ const UserManagement = () => {
     role: 'Employee'
   });
 
-  // Roles matching backend enum
-  const roles = ['Admin', 'FinanceManager', 'Manager', 'Employee', 'Viewer'];
+  // ✅ All roles from backend enum
+  const roles = ['SuperAdmin', 'Admin', 'FinanceManager', 'Manager', 'HR', 'Employee', 'Viewer'];
 
   useEffect(() => {
     // Get current logged-in user role
@@ -167,11 +167,14 @@ const UserManagement = () => {
     });
   };
 
+  // ✅ Updated role colors including SuperAdmin and HR
   const getRoleColor = (role) => {
     const colors = {
+      SuperAdmin: 'bg-red-600 text-white',
       Admin: 'bg-purple-100 text-purple-700',
       FinanceManager: 'bg-indigo-100 text-indigo-700',
       Manager: 'bg-blue-100 text-blue-700',
+      HR: 'bg-pink-100 text-pink-700',
       Employee: 'bg-green-100 text-green-700',
       Viewer: 'bg-gray-100 text-gray-700'
     };
@@ -291,7 +294,9 @@ const UserManagement = () => {
                   <tr key={user._id} className="hover:bg-gray-50 transition-colors">
                     <td className="py-4 px-6">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold">
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold ${
+                          user.role === 'SuperAdmin' ? 'bg-red-600' : 'bg-gradient-to-r from-blue-500 to-purple-500'
+                        }`}>
                           {user.name?.charAt(0).toUpperCase()}
                         </div>
                         <div>
@@ -324,7 +329,7 @@ const UserManagement = () => {
                     </td>
                     <td className="py-4 px-6">
                       <div className="flex items-center justify-center gap-2">
-                        {/* Edit Button - Only if not editing self or allowed */}
+                        {/* Edit Button */}
                         <button
                           onClick={() => {
                             setEditingUser(user);
@@ -364,17 +369,19 @@ const UserManagement = () => {
                           {user.isActive ? <FaToggleOn className="w-5 h-5" /> : <FaToggleOff className="w-5 h-5" />}
                         </button>
                         
-                        {/* Delete Button */}
-                        <button
-                          onClick={() => {
-                            setDeletingUser(user);
-                            setIsDeleteModalOpen(true);
-                          }}
-                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                          title="Delete user"
-                        >
-                          <FaTrash className="w-4 h-4" />
-                        </button>
+                        {/* Delete Button - SuperAdmin can't be deleted by regular Admin */}
+                        {user.role !== 'SuperAdmin' && (
+                          <button
+                            onClick={() => {
+                              setDeletingUser(user);
+                              setIsDeleteModalOpen(true);
+                            }}
+                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                            title="Delete user"
+                          >
+                            <FaTrash className="w-4 h-4" />
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -468,6 +475,9 @@ const UserManagement = () => {
                     ))}
                   </select>
                 </div>
+                {(currentUserRole === 'SuperAdmin' || currentUserRole === 'Admin') && (
+                  <p className="text-xs text-gray-500 mt-1">Note: SuperAdmin role can only be assigned by existing SuperAdmin</p>
+                )}
               </div>
               <button type="submit" className="w-full bg-blue-600 text-white py-2.5 rounded-lg hover:bg-blue-700 transition-colors">
                 {editingUser ? 'Update User' : 'Create User'}

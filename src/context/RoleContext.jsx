@@ -14,39 +14,36 @@ export const useRole = () => {
 export const RoleProvider = ({ children }) => {
   const { user, loading } = useContext(AuthContext);
 
-  // Role check functions - memoized to prevent unnecessary re-renders
-  const isAdmin = () => user?.role === "Admin" || user?.role === "SuperAdmin";
+  // Role check functions
+  const isSuperAdmin = () => user?.role === "SuperAdmin";
+  const isAdmin = () => user?.role === "Admin" || isSuperAdmin();
   const isManager = () => user?.role === "Manager" || user?.role === "FinanceManager";
   const isEmployee = () => user?.role === "Employee";
   const isViewer = () => user?.role === "Viewer";
   const isFinanceManager = () => user?.role === "FinanceManager";
+  const isHR = () => user?.role === "HR";
 
-  // Get all roles as array
-  const getUserRoles = () => {
-    const roles = [];
-    if (isAdmin()) roles.push('Admin');
-    if (isManager()) roles.push('Manager');
-    if (isEmployee()) roles.push('Employee');
-    if (isViewer()) roles.push('Viewer');
-    if (isFinanceManager()) roles.push('FinanceManager');
-    return roles;
-  };
+  // Permission helpers
+  const canViewAllData = isAdmin() || isManager() || isFinanceManager();
+  const canEditData = isAdmin() || isFinanceManager();
+  const canDeleteData = isAdmin();
+  const canManageUsers = isAdmin();
 
-  // Memoized value to prevent unnecessary re-renders
   const value = useMemo(() => ({
     user,
     loading,
     userRole: user?.role || null,
+    isSuperAdmin: isSuperAdmin(),
     isAdmin: isAdmin(),
     isManager: isManager(),
     isEmployee: isEmployee(),
     isViewer: isViewer(),
     isFinanceManager: isFinanceManager(),
-    getUserRoles: getUserRoles(),
-    canViewAllData: isAdmin() || isManager() || isFinanceManager(),
-    canEditData: isAdmin() || isFinanceManager(),
-    canDeleteData: isAdmin(),
-    canManageUsers: isAdmin(),
+    isHR: isHR(),
+    canViewAllData,
+    canEditData,
+    canDeleteData,
+    canManageUsers,
   }), [user, loading]);
 
   return (
