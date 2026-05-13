@@ -1,3 +1,4 @@
+// App.js - Update the DashboardRouter
 import React, { useContext } from "react";
 import {
   BrowserRouter as Router,
@@ -7,13 +8,15 @@ import {
 } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { AuthProvider, AuthContext } from "./context/AuthContext";
-import { RoleProvider } from "./context/RoleContext";
+import { RoleProvider, useRole } from "./context/RoleContext";
 import { useNetworkStatus } from "./hooks/useNetworkStatus";
 import NetworkStatus from "./components/NetworkStatus";
 import Layout from "./components/Layout/Layout";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
+import HRDashboard from "./pages/HR/HRDashboard";
+import AdminDashboard from "./pages/Admin/AdminDashboard";
 import Projects from "./pages/Projects";
 import Transactions from "./pages/Transactions";
 import Budget from "./pages/Budget";
@@ -25,7 +28,6 @@ import FormList from "./pages/HR/FormList";
 import DynamicForm from "./pages/HR/DynamicForm";
 import Submissions from "./pages/HR/Submissions";
 
-// Protected Route wrapper using AuthContext
 const ProtectedRoute = ({ children }) => {
   const { user } = useContext(AuthContext);
   const token = localStorage.getItem("token");
@@ -35,6 +37,29 @@ const ProtectedRoute = ({ children }) => {
   }
 
   return children;
+};
+
+// ✅ FIXED: Role-based Dashboard Router
+const DashboardRouter = () => {
+  const { userRole } = useRole();
+  
+  console.log('DashboardRouter - Current user role:', userRole);
+  
+  // Check for Admin role (case insensitive)
+  if (userRole === 'Admin' || userRole === 'admin' || userRole === 'ADMIN') {
+    console.log('Rendering Admin Dashboard');
+    return <AdminDashboard />;
+  }
+  
+  // Check for HR role (case insensitive)
+  if (userRole === 'HR' || userRole === 'hr' || userRole === 'Hr') {
+    console.log('Rendering HR Dashboard');
+    return <HRDashboard />;
+  }
+  
+  // Default to Employee Dashboard
+  console.log('Rendering Employee Dashboard');
+  return <Dashboard />;
 };
 
 function AppContent() {
@@ -64,7 +89,7 @@ function AppContent() {
           }
         >
           <Route index element={<Navigate to="/dashboard" replace />} />
-          <Route path="dashboard" element={<Dashboard />} />
+          <Route path="dashboard" element={<DashboardRouter />} />
           <Route path="projects" element={<Projects />} />
           <Route path="transactions" element={<Transactions />} />
           <Route path="budget" element={<Budget />} />
@@ -73,7 +98,7 @@ function AppContent() {
           <Route path="users" element={<UserManagement />} />
           <Route path="forms" element={<FormList />} />
           <Route path="forms/builder" element={<FormBuilder />} />
-          <Route path="forms/:id" element={<DynamicForm />} />
+          <Route path="forms/fill/:id" element={<DynamicForm />} />
           <Route path="submissions" element={<Submissions />} />
         </Route>
       </Routes>
@@ -94,3 +119,6 @@ function App() {
 }
 
 export default App;
+
+
+

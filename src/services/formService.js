@@ -1,45 +1,83 @@
+// services/formService.js
 import api from './api';
 
 const formService = {
-  // Create a new form (HR only)
+  // HR: Create a new form
   createForm: async (formData) => {
-    const response = await api.post('/forms', formData);
-    return response;
+    try {
+      const response = await api.post('/forms', formData);
+      return response;
+    } catch (error) {
+      console.error('Create form error:', error);
+      throw error;
+    }
   },
-  
-  // Get all forms for the company
+
+  // Get all forms
   getAllForms: async () => {
-    const response = await api.get('/forms');
-    return response;
+    try {
+      const response = await api.get('/forms');
+      return response;
+    } catch (error) {
+      console.error('Get forms error:', error);
+      throw error;
+    }
   },
-  
+
   // Get single form by ID
-  getFormById: async (id) => {
-    const response = await api.get(`/forms/${id}`);
+  getFormById: async (formId) => {
+    try {
+      const response = await api.get('/forms');
+      const form = response.data.forms.find(f => f._id === formId);
+      if (!form) {
+        throw new Error('Form not found');
+      }
+      return { data: { form } };
+    } catch (error) {
+      console.error('Get form by ID error:', error);
+      throw error;
+    }
+  },
+
+  // Update form
+  updateForm: async (formId, formData) => {
+    const response = await api.put(`/forms/${formId}`, formData);
     return response;
   },
-  
-  // Submit a form
+
+  // Delete form
+  deleteForm: async (formId) => {
+    const response = await api.delete(`/forms/${formId}`);
+    return response;
+  },
+
+  // Submit form
   submitForm: async (formId, responses) => {
     const response = await api.post('/submissions', { formId, responses });
     return response;
   },
-  
-  // Approve a submission
-  approveSubmission: async (submissionId) => {
-    const response = await api.put(`/submissions/${submissionId}/approve`);
-    return response;
-  },
-  
-  // Reject a submission (optional)
-  rejectSubmission: async (submissionId, reason) => {
-    const response = await api.put(`/submissions/${submissionId}/reject`, { reason });
-    return response;
-  },
-  
-  // Get all submissions (for HR/Admin)
+
+  // Get all submissions
   getAllSubmissions: async () => {
     const response = await api.get('/submissions');
+    return response;
+  },
+  
+
+  // Approve submission
+  approveSubmission: async (submissionId) => {
+    const response = await api.put(`/submissions/${submissionId}/status`, {
+      status: 'approved'
+    });
+    return response;
+  },
+
+  // Reject submission
+  rejectSubmission: async (submissionId, rejectionReason) => {
+    const response = await api.put(`/submissions/${submissionId}/status`, {
+      status: 'rejected',
+      rejectionReason
+    });
     return response;
   }
 };

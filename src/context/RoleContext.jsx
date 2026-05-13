@@ -1,3 +1,4 @@
+// src/context/RoleContext.js
 import React, { createContext, useContext, useMemo } from "react";
 import { AuthContext } from "./AuthContext";
 
@@ -14,14 +15,16 @@ export const useRole = () => {
 export const RoleProvider = ({ children }) => {
   const { user, loading } = useContext(AuthContext);
 
-  // Role check functions
-  const isSuperAdmin = () => user?.role === "SuperAdmin";
-  const isAdmin = () => user?.role === "Admin" || isSuperAdmin();
-  const isManager = () => user?.role === "Manager" || user?.role === "FinanceManager";
-  const isEmployee = () => user?.role === "Employee";
-  const isViewer = () => user?.role === "Viewer";
-  const isFinanceManager = () => user?.role === "FinanceManager";
-  const isHR = () => user?.role === "HR";
+  const userRole = user?.role || null;
+
+  // Role check functions - ✅ FIXED for case sensitivity
+  const isSuperAdmin = () => userRole === "SuperAdmin" || userRole === "superadmin";
+  const isAdmin = () => userRole === "Admin" || userRole === "admin" || isSuperAdmin();
+  const isManager = () => userRole === "Manager" || userRole === "manager";
+  const isEmployee = () => userRole === "Employee" || userRole === "employee";
+  const isViewer = () => userRole === "Viewer" || userRole === "viewer";
+  const isFinanceManager = () => userRole === "FinanceManager" || userRole === "financemanager";
+  const isHR = () => userRole === "HR" || userRole === "hr";
 
   // Permission helpers
   const canViewAllData = isAdmin() || isManager() || isFinanceManager();
@@ -32,7 +35,7 @@ export const RoleProvider = ({ children }) => {
   const value = useMemo(() => ({
     user,
     loading,
-    userRole: user?.role || null,
+    userRole,
     isSuperAdmin: isSuperAdmin(),
     isAdmin: isAdmin(),
     isManager: isManager(),

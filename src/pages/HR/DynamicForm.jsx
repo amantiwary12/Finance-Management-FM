@@ -1,3 +1,4 @@
+// pages/HR/DynamicForm.jsx
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { FaArrowLeft, FaPaperPlane, FaSpinner } from 'react-icons/fa';
@@ -45,7 +46,7 @@ const DynamicForm = () => {
     
     // Validate required fields
     for (const field of form.fields) {
-      if (field.required && !responses[field.label]) {
+      if (field.required && (!responses[field.label] || responses[field.label] === '')) {
         toast.error(`Please fill in "${field.label}"`);
         return;
       }
@@ -81,7 +82,17 @@ const DynamicForm = () => {
             onChange={(e) => handleInputChange(field.label, e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
             placeholder={`Enter ${field.label.toLowerCase()}`}
-            required={field.required}
+          />
+        );
+      
+      case 'textarea':
+        return (
+          <textarea
+            value={value}
+            onChange={(e) => handleInputChange(field.label, e.target.value)}
+            rows="4"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+            placeholder={`Enter ${field.label.toLowerCase()}`}
           />
         );
       
@@ -93,7 +104,6 @@ const DynamicForm = () => {
             onChange={(e) => handleInputChange(field.label, e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
             placeholder={`Enter ${field.label.toLowerCase()}`}
-            required={field.required}
           />
         );
       
@@ -104,7 +114,6 @@ const DynamicForm = () => {
             value={value}
             onChange={(e) => handleInputChange(field.label, e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-            required={field.required}
           />
         );
       
@@ -114,7 +123,6 @@ const DynamicForm = () => {
             value={value}
             onChange={(e) => handleInputChange(field.label, e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-            required={field.required}
           >
             <option value="">Select {field.label.toLowerCase()}...</option>
             {field.options?.map((option, idx) => (
@@ -131,7 +139,7 @@ const DynamicForm = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
       </div>
     );
   }

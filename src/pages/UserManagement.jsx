@@ -3,7 +3,8 @@ import {
   FaPlus, FaEdit, FaTrash, FaEye, FaEyeSlash, 
   FaToggleOn, FaToggleOff, FaSync, FaSearch, 
   FaUserPlus, FaKey, FaCheck, FaTimes,
-  FaUser, FaPhone, FaBriefcase, FaCalendar, FaBuilding
+  FaUser, FaPhone, FaBriefcase, FaCalendar, FaBuilding,
+  FaSpinner
 } from 'react-icons/fa';
 import userService from '../services/userService';
 import toast from 'react-hot-toast';
@@ -11,6 +12,7 @@ import toast from 'react-hot-toast';
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -30,22 +32,18 @@ const UserManagement = () => {
     role: 'Employee'
   });
 
-  // ✅ All roles from backend enum
   const roles = ['SuperAdmin', 'Admin', 'FinanceManager', 'Manager', 'HR', 'Employee', 'Viewer'];
 
   useEffect(() => {
-    // Get current logged-in user role
     const currentUser = JSON.parse(localStorage.getItem('user'));
     setCurrentUserRole(currentUser?.role);
     fetchUsers();
   }, []);
 
-  // Fetch all users (only same company - backend handles filtering)
   const fetchUsers = async () => {
     try {
       setLoading(true);
       const response = await userService.getAllUsers();
-      console.log('Users response:', response.data);
       setUsers(response.data.users || []);
     } catch (error) {
       console.error('Failed to fetch users:', error);
@@ -55,7 +53,6 @@ const UserManagement = () => {
     }
   };
 
-  // Filter users
   const filteredUsers = users.filter(user => {
     const matchesSearch = user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                           user.mobileNumber?.includes(searchTerm);
@@ -66,12 +63,27 @@ const UserManagement = () => {
     return matchesSearch && matchesRole && matchesStatus;
   });
 
-  // Create or update user
+  // ✅ FIXED: Handle user creation with proper error handling
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validate mobile number
+    if (!editingUser && (!formData.mobileNumber || formData.mobileNumber.length !== 10)) {
+      toast.error('Please enter a valid 10-digit mobile number');
+      return;
+    }
+    
+    // Validate password for new user
+    if (!editingUser && (!formData.password || formData.password.length < 6)) {
+      toast.error('Password must be at least 6 characters');
+      return;
+    }
+    
     try {
+      setSubmitting(true);
+      
       if (editingUser) {
-        // Update user (only name and role can be updated)
+        // Update user
         const updateData = {
           name: formData.name,
           role: formData.role
@@ -83,6 +95,8 @@ const UserManagement = () => {
         await userService.createUser(formData);
         toast.success('User created successfully');
       }
+      
+      // ✅ Close modal and reset form first
       setIsModalOpen(false);
       setEditingUser(null);
       setFormData({
@@ -91,16 +105,19 @@ const UserManagement = () => {
         password: '',
         role: 'Employee'
       });
-      fetchUsers();
+      
+      // ✅ Refresh user list
+      await fetchUsers();
+      
     } catch (error) {
       console.error('Submit error:', error);
       toast.error(error.response?.data?.message || 'Something went wrong');
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  // Toggle user status (Activate/Deactivate)
   const handleToggleStatus = async (user) => {
-    // Prevent self deactivation
     const currentUser = JSON.parse(localStorage.getItem('user'));
     if (currentUser._id === user._id) {
       toast.error('You cannot change your own status');
@@ -110,14 +127,13 @@ const UserManagement = () => {
     try {
       await userService.updateUserStatus(user._id, !user.isActive);
       toast.success(`${user.name} ${!user.isActive ? 'activated' : 'deactivated'} successfully`);
-      fetchUsers();
+      await fetchUsers();
     } catch (error) {
       console.error('Status update error:', error);
       toast.error('Failed to update user status');
     }
   };
 
-  // Reset user password
   const handleResetPassword = async () => {
     if (!newPassword || newPassword.length < 6) {
       toast.error('Password must be at least 6 characters');
@@ -125,36 +141,76 @@ const UserManagement = () => {
     }
     
     try {
+      setSubmitting(true);
       await userService.resetPassword(resettingUser._id, newPassword);
       toast.success(`Password reset for ${resettingUser.name}`);
       setIsPasswordModalOpen(false);
       setNewPassword('');
       setResettingUser(null);
+      await fetchUsers();
     } catch (error) {
       console.error('Password reset error:', error);
       toast.error('Failed to reset password');
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  // Delete user
   const handleDelete = async () => {
-    // Prevent self deletion
     const currentUser = JSON.parse(localStorage.getItem('user'));
     if (currentUser._id === deletingUser._id) {
       toast.error('You cannot delete your own account');
+      setIsDeleteModalOpen(false);
+      setDeletingUser(null);
       return;
     }
     
     try {
+      setSubmitting(true);
       await userService.deleteUser(deletingUser._id);
       toast.success(`${deletingUser.name} deleted successfully`);
       setIsDeleteModalOpen(false);
       setDeletingUser(null);
-      fetchUsers();
+      await fetchUsers();
     } catch (error) {
       console.error('Delete error:', error);
       toast.error('Failed to delete user');
+    } finally {
+      setSubmitting(false);
     }
+  };
+
+  const openCreateModal = () => {
+    setEditingUser(null);
+    setFormData({
+      name: '',
+      mobileNumber: '',
+      password: '',
+      role: 'Employee'
+    });
+    setIsModalOpen(true);
+  };
+
+  const openEditModal = (user) => {
+    setEditingUser(user);
+    setFormData({
+      name: user.name,
+      mobileNumber: user.mobileNumber,
+      password: '',
+      role: user.role
+    });
+    setIsModalOpen(true);
+  };
+
+  const openDeleteModal = (user) => {
+    setDeletingUser(user);
+    setIsDeleteModalOpen(true);
+  };
+
+  const openPasswordModal = (user) => {
+    setResettingUser(user);
+    setNewPassword('');
+    setIsPasswordModalOpen(true);
   };
 
   const formatDate = (dateString) => {
@@ -167,7 +223,6 @@ const UserManagement = () => {
     });
   };
 
-  // ✅ Updated role colors including SuperAdmin and HR
   const getRoleColor = (role) => {
     const colors = {
       SuperAdmin: 'bg-red-600 text-white',
@@ -201,16 +256,7 @@ const UserManagement = () => {
           <p className="text-gray-600 mt-1">Manage users within your company</p>
         </div>
         <button
-          onClick={() => {
-            setEditingUser(null);
-            setFormData({
-              name: '',
-              mobileNumber: '',
-              password: '',
-              role: 'Employee'
-            });
-            setIsModalOpen(true);
-          }}
+          onClick={openCreateModal}
           className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-5 py-2.5 rounded-xl hover:from-blue-700 hover:to-blue-800 flex items-center gap-2 shadow-md transition-all"
         >
           <FaUserPlus className="w-4 h-4" />
@@ -301,7 +347,7 @@ const UserManagement = () => {
                         </div>
                         <div>
                           <p className="font-medium text-gray-800">{user.name}</p>
-                          <p className="text-xs text-gray-400">{user._id}</p>
+                          <p className="text-xs text-gray-400">{user._id?.slice(-8)}</p>
                         </div>
                       </div>
                     </td>
@@ -329,38 +375,22 @@ const UserManagement = () => {
                     </td>
                     <td className="py-4 px-6">
                       <div className="flex items-center justify-center gap-2">
-                        {/* Edit Button */}
                         <button
-                          onClick={() => {
-                            setEditingUser(user);
-                            setFormData({
-                              name: user.name,
-                              mobileNumber: user.mobileNumber,
-                              password: '',
-                              role: user.role
-                            });
-                            setIsModalOpen(true);
-                          }}
+                          onClick={() => openEditModal(user)}
                           className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                           title="Edit user"
                         >
                           <FaEdit className="w-4 h-4" />
                         </button>
                         
-                        {/* Reset Password Button */}
                         <button
-                          onClick={() => {
-                            setResettingUser(user);
-                            setNewPassword('');
-                            setIsPasswordModalOpen(true);
-                          }}
+                          onClick={() => openPasswordModal(user)}
                           className="p-2 text-yellow-600 hover:bg-yellow-50 rounded-lg transition-colors"
                           title="Reset password"
                         >
                           <FaKey className="w-4 h-4" />
                         </button>
                         
-                        {/* Toggle Status Button */}
                         <button
                           onClick={() => handleToggleStatus(user)}
                           className="p-2 text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
@@ -369,13 +399,9 @@ const UserManagement = () => {
                           {user.isActive ? <FaToggleOn className="w-5 h-5" /> : <FaToggleOff className="w-5 h-5" />}
                         </button>
                         
-                        {/* Delete Button - SuperAdmin can't be deleted by regular Admin */}
                         {user.role !== 'SuperAdmin' && (
                           <button
-                            onClick={() => {
-                              setDeletingUser(user);
-                              setIsDeleteModalOpen(true);
-                            }}
+                            onClick={() => openDeleteModal(user)}
                             className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                             title="Delete user"
                           >
@@ -391,7 +417,6 @@ const UserManagement = () => {
           </table>
         </div>
         
-        {/* Summary */}
         <div className="bg-gray-50 px-6 py-4 border-t">
           <p className="text-sm text-gray-600">
             Showing {filteredUsers.length} of {users.length} users
@@ -401,17 +426,25 @@ const UserManagement = () => {
 
       {/* Create/Edit User Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-md">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onClick={(e) => {
+          if (e.target === e.currentTarget) setIsModalOpen(false);
+        }}>
+          <div className="bg-white rounded-2xl p-6 w-full max-w-md relative">
             <div className="flex justify-between items-center mb-5">
               <h2 className="text-xl font-bold">
                 {editingUser ? 'Edit User' : 'Add New User'}
               </h2>
-              <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600 text-2xl">×</button>
+              <button 
+                onClick={() => setIsModalOpen(false)} 
+                className="text-gray-400 hover:text-gray-600 text-2xl"
+                disabled={submitting}
+              >
+                ×
+              </button>
             </div>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Full Name *</label>
                 <div className="relative">
                   <FaUser className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                   <input
@@ -420,11 +453,13 @@ const UserManagement = () => {
                     onChange={(e) => setFormData({...formData, name: e.target.value})}
                     className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                     required
+                    disabled={submitting}
                   />
                 </div>
               </div>
+              
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Mobile Number</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Mobile Number *</label>
                 <div className="relative">
                   <FaPhone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                   <input
@@ -433,14 +468,17 @@ const UserManagement = () => {
                     onChange={(e) => setFormData({...formData, mobileNumber: e.target.value})}
                     className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                     required
-                    disabled={!!editingUser}
+                    disabled={!!editingUser || submitting}
                     placeholder="10-digit mobile number"
+                    pattern="[0-9]{10}"
+                    maxLength="10"
                   />
                 </div>
               </div>
+              
               {!editingUser && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Password *</label>
                   <div className="relative">
                     <input
                       type={showPassword ? 'text' : 'password'}
@@ -449,6 +487,7 @@ const UserManagement = () => {
                       className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                       required={!editingUser}
                       minLength="6"
+                      disabled={submitting}
                     />
                     <button
                       type="button"
@@ -461,26 +500,37 @@ const UserManagement = () => {
                   <p className="text-xs text-gray-500 mt-1">Minimum 6 characters</p>
                 </div>
               )}
+              
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Role</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Role *</label>
                 <div className="relative">
                   <FaBriefcase className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                   <select
                     value={formData.role}
                     onChange={(e) => setFormData({...formData, role: e.target.value})}
                     className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                    disabled={submitting}
                   >
                     {roles.map(role => (
                       <option key={role} value={role}>{role}</option>
                     ))}
                   </select>
                 </div>
-                {(currentUserRole === 'SuperAdmin' || currentUserRole === 'Admin') && (
-                  <p className="text-xs text-gray-500 mt-1">Note: SuperAdmin role can only be assigned by existing SuperAdmin</p>
-                )}
               </div>
-              <button type="submit" className="w-full bg-blue-600 text-white py-2.5 rounded-lg hover:bg-blue-700 transition-colors">
-                {editingUser ? 'Update User' : 'Create User'}
+              
+              <button 
+                type="submit" 
+                disabled={submitting}
+                className="w-full bg-blue-600 text-white py-2.5 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {submitting ? (
+                  <>
+                    <FaSpinner className="animate-spin w-4 h-4" />
+                    {editingUser ? 'Updating...' : 'Creating...'}
+                  </>
+                ) : (
+                  editingUser ? 'Update User' : 'Create User'
+                )}
               </button>
             </form>
           </div>
@@ -489,11 +539,19 @@ const UserManagement = () => {
 
       {/* Reset Password Modal */}
       {isPasswordModalOpen && resettingUser && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-md">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onClick={(e) => {
+          if (e.target === e.currentTarget) setIsPasswordModalOpen(false);
+        }}>
+          <div className="bg-white rounded-2xl p-6 w-full max-w-md relative">
             <div className="flex justify-between items-center mb-5">
               <h2 className="text-xl font-bold">Reset Password</h2>
-              <button onClick={() => setIsPasswordModalOpen(false)} className="text-gray-400 hover:text-gray-600 text-2xl">×</button>
+              <button 
+                onClick={() => setIsPasswordModalOpen(false)} 
+                className="text-gray-400 hover:text-gray-600 text-2xl"
+                disabled={submitting}
+              >
+                ×
+              </button>
             </div>
             <div className="space-y-4">
               <div>
@@ -513,6 +571,7 @@ const UserManagement = () => {
                     placeholder="Enter new password"
                     minLength="6"
                     autoFocus
+                    disabled={submitting}
                   />
                   <button
                     type="button"
@@ -528,13 +587,16 @@ const UserManagement = () => {
                 <button
                   onClick={() => setIsPasswordModalOpen(false)}
                   className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                  disabled={submitting}
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleResetPassword}
-                  className="flex-1 px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors"
+                  disabled={submitting}
+                  className="flex-1 px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
+                  {submitting ? <FaSpinner className="animate-spin w-4 h-4" /> : null}
                   Reset Password
                 </button>
               </div>
@@ -545,8 +607,10 @@ const UserManagement = () => {
 
       {/* Delete Confirmation Modal */}
       {isDeleteModalOpen && deletingUser && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-md">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={(e) => {
+          if (e.target === e.currentTarget) setIsDeleteModalOpen(false);
+        }}>
+          <div className="bg-white rounded-2xl p-6 w-full max-w-md relative">
             <div className="text-center mb-4">
               <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
                 <FaTrash className="h-6 w-6 text-red-600" />
@@ -561,13 +625,16 @@ const UserManagement = () => {
               <button
                 onClick={() => setIsDeleteModalOpen(false)}
                 className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                disabled={submitting}
               >
                 Cancel
               </button>
               <button
                 onClick={handleDelete}
-                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                disabled={submitting}
+                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
+                {submitting ? <FaSpinner className="animate-spin w-4 h-4" /> : null}
                 Delete
               </button>
             </div>

@@ -1,9 +1,10 @@
+// src/components/Layout/Sidebar.jsx
 import React, { useContext } from "react";
 import { NavLink } from "react-router-dom";
 import { AuthContext } from "../../context/AuthContext";
 import { useRole } from "../../context/RoleContext";
 import {
-  FaTachometerAlt,
+  FaTachometerAlt, 
   FaProjectDiagram,
   FaMoneyBillWave,
   FaChartPie,
@@ -14,26 +15,41 @@ import {
   FaBuilding,
   FaFileAlt,
   FaClipboardList,
+  FaCog
 } from "react-icons/fa";
 
 const Sidebar = () => {
   const { user, company, logout } = useContext(AuthContext);
-  const { canManageUsers, userRole, isHR, isAdmin } = useRole();
+  const { userRole, isAdmin, isHR, isManager, isFinanceManager, canManageUsers } = useRole();
 
   const menuItems = [
     { path: "/dashboard", icon: FaTachometerAlt, label: "Dashboard" },
-    { path: "/projects", icon: FaProjectDiagram, label: "Projects" },
-    { path: "/transactions", icon: FaMoneyBillWave, label: "Transactions" },
-    { path: "/budget", icon: FaChartPie, label: "Budget" },
-    { path: "/notifications", icon: FaBell, label: "Notifications" },
   ];
 
-  // Add User Management menu only for users who can manage users (Admin)
+  // Projects - Visible to all except viewers
+  if (userRole !== "Viewer") {
+    menuItems.push({ path: "/projects", icon: FaProjectDiagram, label: "Projects" });
+  }
+
+  // Transactions - Visible to all except viewers
+  if (userRole !== "Viewer") {
+    menuItems.push({ path: "/transactions", icon: FaMoneyBillWave, label: "Transactions" });
+  }
+
+  // Budget - Only for Admin, Manager, FinanceManager
+  if (isAdmin() || isManager() || isFinanceManager()) {
+    menuItems.push({ path: "/budget", icon: FaChartPie, label: "Budget" });
+  }
+
+  // Notifications - For all users
+  menuItems.push({ path: "/notifications", icon: FaBell, label: "Notifications" });
+
+  // User Management - Admin only
   if (canManageUsers) {
     menuItems.push({ path: "/users", icon: FaUsers, label: "User Management" });
   }
 
-  // Add HR/Form Management menu for HR, Admin, and FinanceManager
+  // Forms & Submissions - HR and Admin only
   if (isHR() || isAdmin()) {
     menuItems.push(
       { path: "/forms", icon: FaFileAlt, label: "Forms" },
@@ -41,18 +57,31 @@ const Sidebar = () => {
     );
   }
 
-  const isActive = (path) => window.location.pathname === path;
+  // Settings - Admin only
+  if (isAdmin()) {
+    menuItems.push({ path: "/settings", icon: FaCog, label: "Settings" });
+  }
 
-  // Get role badge color
   const getRoleBadgeColor = () => {
     switch(userRole) {
       case 'Admin': return 'bg-red-500';
+      case 'HR': return 'bg-pink-500';
       case 'Manager': return 'bg-blue-500';
       case 'FinanceManager': return 'bg-purple-500';
-      case 'HR': return 'bg-pink-500';
       case 'Employee': return 'bg-green-500';
       case 'Viewer': return 'bg-gray-500';
       default: return 'bg-gray-500';
+    }
+  };
+
+  const getRoleIcon = () => {
+    switch(userRole) {
+      case 'Admin': return '👑';
+      case 'HR': return '👥';
+      case 'Manager': return '📊';
+      case 'FinanceManager': return '💰';
+      case 'Employee': return '👤';
+      default: return '👤';
     }
   };
 
@@ -68,9 +97,12 @@ const Sidebar = () => {
         )}
         <p className="text-xs text-gray-500 mt-1">Track your finances</p>
         {userRole && (
-          <span className={`inline-block mt-2 px-2 py-0.5 rounded-full text-xs ${getRoleBadgeColor()}`}>
-            {userRole}
-          </span>
+          <div className="flex items-center gap-2 mt-2">
+            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs ${getRoleBadgeColor()}`}>
+              <span>{getRoleIcon()}</span>
+              <span>{userRole}</span>
+            </span>
+          </div>
         )}
       </div>
 
@@ -79,11 +111,11 @@ const Sidebar = () => {
           <NavLink
             key={item.path}
             to={item.path}
-            className={`flex items-center px-6 py-3 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors ${
-              isActive(item.path)
-                ? "bg-gray-700 text-white border-r-4 border-blue-500"
-                : ""
-            }`}
+            className={({ isActive }) => 
+              `flex items-center px-6 py-3 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors ${
+                isActive ? "bg-gray-700 text-white border-r-4 border-blue-500" : ""
+              }`
+            }
           >
             <item.icon className="w-5 h-5 mr-3" />
             <span>{item.label}</span>
@@ -95,7 +127,7 @@ const Sidebar = () => {
         <div className="flex items-center mb-4 p-2 bg-gray-800 rounded-lg">
           <FaUserCircle className="w-8 h-8 text-gray-400 mr-3" />
           <div className="flex-1">
-            <p className="text-sm font-medium">{user?.name}</p>
+            <p className="text-sm font-medium truncate">{user?.name}</p>
             <p className="text-xs text-gray-400">{user?.mobileNumber}</p>
           </div>
         </div>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { FaPlus, FaFileAlt, FaEye, FaClipboardList } from 'react-icons/fa';
 import formService from '../../services/formService';
 import { useRole } from '../../context/RoleContext';
@@ -8,8 +8,7 @@ import toast from 'react-hot-toast';
 const FormList = () => {
   const [forms, setForms] = useState([]);
   const [loading, setLoading] = useState(true);
-  const { isAdmin, userRole } = useRole();
-  const navigate = useNavigate();
+  const { userRole } = useRole();
   
   const isHR = userRole === 'HR' || userRole === 'Admin';
 

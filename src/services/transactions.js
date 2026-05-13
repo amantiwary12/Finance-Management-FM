@@ -1,34 +1,8 @@
-// import api from './api';
-
-// const projectService = {
-//   createProject: (data) => api.post('/projects', data),
-  
-//   getAllProjects: async () => {
-//     try {
-//       const response = await api.get('/projects');
-//       return response;
-//     } catch (error) {
-//       console.error('Error fetching projects:', error);
-//       throw error;
-//     }
-//   },
-  
-//   updateProjectStatus: (id, status) => api.patch(`/projects/${id}/status`, { status }),
-  
-//   deleteProject: (id) => {
-//     console.log('Deleting project with ID:', id);
-//     return api.delete(`/projects/${id}`);
-//   },
-// };
-
-// export default projectService;
-
-
-
-
+// src/services/transactionService.js
 import api from './api';
 
 const transactionService = {
+  // Create new transaction
   createTransaction: (data) => {
     if (data instanceof FormData) {
       return api.post("/transactions", data, {
@@ -52,10 +26,10 @@ const transactionService = {
       }
     });
 
-    console.log('Creating transaction with JSON:', backendData);
     return api.post("/transactions", backendData);
   },
 
+  // Update transaction
   updateTransaction: (id, data) => {
     if (data instanceof FormData) {
       return api.put(`/transactions/${id}`, data, {
@@ -65,68 +39,82 @@ const transactionService = {
     return api.put(`/transactions/${id}`, data);
   },
 
+  // Get all transactions with filters
   getTransactions: (params) => {
-    console.log('Fetching transactions with params:', params);
     const queryParams = {};
-    if (params.type) queryParams.type = params.type;
-    if (params.category) queryParams.category = params.category;
-    if (params.project) queryParams.project = params.project;
-    if (params.userId) queryParams.userId = params.userId;
-    if (params.page) queryParams.page = params.page;
-    if (params.limit) queryParams.limit = params.limit;
-    if (params.startDate) queryParams.startDate = params.startDate;
-    if (params.endDate) queryParams.endDate = params.endDate;
+    if (params?.type) queryParams.type = params.type;
+    if (params?.category) queryParams.category = params.category;
+    if (params?.project) queryParams.project = params.project;
+    if (params?.userId) queryParams.userId = params.userId;
+    if (params?.page) queryParams.page = params.page;
+    if (params?.limit) queryParams.limit = params.limit;
+    if (params?.startDate) queryParams.startDate = params.startDate;
+    if (params?.endDate) queryParams.endDate = params.endDate;
+    if (params?.search) queryParams.search = params.search;
     
     return api.get("/transactions", { params: queryParams });
   },
 
-  // ✅ Get daily expenses for weekly chart
-  getDailyExpenses: async (startDate, endDate) => {
-    console.log(`📊 Fetching daily expenses from ${startDate} to ${endDate}`);
-    const response = await api.get('/transactions/daily-expenses', { 
-      params: { startDate, endDate } 
-    });
+  // ✅ Get daily expenses for weekly chart (EXISTS in your backend)
+  getDailyExpenses: async (startDate, endDate, project = null) => {
+    const params = { startDate, endDate };
+    if (project) params.project = project;
+    const response = await api.get('/transactions/daily-expenses', { params });
     return response;
   },
 
-  // ✅ Get weekly summary (income/expense totals for current week)
-  getWeeklySummary: async () => {
-    console.log('📊 Fetching weekly summary');
-    const response = await api.get('/transactions/weekly-summary');
+  // ✅ Get weekly summary (EXISTS in your backend)
+  getWeeklySummary: async (project = null) => {
+    const params = {};
+    if (project) params.project = project;
+    const response = await api.get('/transactions/weekly-summary', { params });
     return response;
   },
 
-  // ✅ Get monthly summary for specific month/year
-  getMonthlySummary: async (month, year) => {
-    console.log(`📊 Fetching monthly summary for ${month}/${year}`);
-    const response = await api.get('/transactions/monthly-summary', { 
-      params: { month, year } 
-    });
+  // ✅ Get monthly summary (EXISTS in your backend)
+  getMonthlySummary: async (month, year, project = null) => {
+    const params = { month, year };
+    if (project) params.project = project;
+    const response = await api.get('/transactions/monthly-summary', { params });
     return response;
   },
 
-  // ✅ Get category summary for spending breakdown
-  getCategorySummary: async (startDate, endDate) => {
-    console.log(`📊 Fetching category summary`);
+  // ✅ Get yearly summary (EXISTS in your backend)
+  getYearlySummary: async (year, project = null) => {
+    const params = { year };
+    if (project) params.project = project;
+    const response = await api.get('/transactions/yearly-summary', { params });
+    return response;
+  },
+
+  // ✅ Get category summary (EXISTS in your backend)
+  getCategorySummary: async (startDate = null, endDate = null, project = null) => {
     const params = {};
     if (startDate) params.startDate = startDate;
     if (endDate) params.endDate = endDate;
+    if (project) params.project = project;
     const response = await api.get('/transactions/category-summary', { params });
     return response;
   },
 
+  // Get dashboard data
+  getDashboardData: async () => {
+    const response = await api.get('/transactions/dashboard');
+    return response;
+  },
+
+  // Delete transaction
   deleteTransaction: (id) => {
-    console.log(`Deleting transaction: ${id}`);
     return api.delete(`/transactions/${id}`);
   },
 
+  // Clear all transactions (Admin only)
   clearAllTransactions: () => {
-    console.log('Clearing ALL transactions');
     return api.delete("/transactions/clear");
   },
 
+  // Export transactions to Excel
   exportTransactions: (params) => {
-    console.log('Exporting transactions with params:', params);
     return api.get("/transactions/export", { params, responseType: 'blob' });
   },
 };
