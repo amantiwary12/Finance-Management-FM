@@ -63,6 +63,12 @@ const formService = {
     return response;
   },
   
+  // Get logged-in user's own submissions
+  getMySubmissions: async () => {
+    const response = await api.get('/submissions/my');
+    return response;
+  },
+  
 
   // Approve submission
   approveSubmission: async (submissionId) => {

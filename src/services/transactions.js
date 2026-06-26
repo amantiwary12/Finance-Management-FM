@@ -117,6 +117,11 @@ const transactionService = {
   exportTransactions: (params) => {
     return api.get("/transactions/export", { params, responseType: 'blob' });
   },
+
+  // Get overall income/expense summary
+  getSummary: (params) => {
+    return api.get("/transactions/summary", { params });
+  },
 };
 
 export default transactionService;

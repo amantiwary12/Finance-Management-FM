@@ -12,6 +12,7 @@ import { RoleProvider, useRole } from "./context/RoleContext";
 import { useNetworkStatus } from "./hooks/useNetworkStatus";
 import NetworkStatus from "./components/NetworkStatus";
 import Layout from "./components/Layout/Layout";
+import LandingPage from "./pages/LandingPage";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
@@ -27,16 +28,29 @@ import FormBuilder from "./pages/HR/FormBuilder";
 import FormList from "./pages/HR/FormList";
 import DynamicForm from "./pages/HR/DynamicForm";
 import Submissions from "./pages/HR/Submissions";
+import EmployeeForms from "./pages/Employee/EmployeeForms";
+import Settings from "./pages/Settings";
 
 const ProtectedRoute = ({ children }) => {
   const { user } = useContext(AuthContext);
   const token = localStorage.getItem("token");
 
   if (!token || !user) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/landing" replace />;
   }
 
   return children;
+};
+
+// ✅ FIXED: Role-based Forms Router
+const FormsRouter = () => {
+  const { userRole } = useRole();
+  
+  if (userRole === 'HR' || userRole === 'hr' || userRole === 'Hr') {
+    return <FormList />;
+  }
+  
+  return <EmployeeForms />;
 };
 
 // ✅ FIXED: Role-based Dashboard Router
@@ -78,6 +92,7 @@ function AppContent() {
       />
       <NetworkStatus isOnline={isOnline} wasOffline={wasOffline} />
       <Routes>
+        <Route path="/landing" element={<LandingPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route
@@ -89,6 +104,7 @@ function AppContent() {
           }
         >
           <Route index element={<Navigate to="/dashboard" replace />} />
+
           <Route path="dashboard" element={<DashboardRouter />} />
           <Route path="projects" element={<Projects />} />
           <Route path="transactions" element={<Transactions />} />
@@ -96,10 +112,11 @@ function AppContent() {
           <Route path="notifications" element={<Notifications />} />
           <Route path="projects/:id" element={<ProjectDetails />} />
           <Route path="users" element={<UserManagement />} />
-          <Route path="forms" element={<FormList />} />
+          <Route path="forms" element={<FormsRouter />} />
           <Route path="forms/builder" element={<FormBuilder />} />
           <Route path="forms/fill/:id" element={<DynamicForm />} />
           <Route path="submissions" element={<Submissions />} />
+          <Route path="settings" element={<Settings />} />
         </Route>
       </Routes>
     </>

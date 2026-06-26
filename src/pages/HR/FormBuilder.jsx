@@ -9,6 +9,7 @@ const FormBuilder = () => {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
+    notificationEmails: '',
     fields: []
   });
   const [loading, setLoading] = useState(false);
@@ -152,9 +153,14 @@ const handleSubmit = async (e) => {
       return cleanedField;
     });
     
+    const emailsArray = formData.notificationEmails
+      ? formData.notificationEmails.split(',').map(e => e.trim()).filter(Boolean)
+      : [];
+
     const submitData = {
       title: formData.title,
       description: formData.description || '',
+      notificationEmails: emailsArray,
       fields: cleanFields
     };
     
@@ -213,6 +219,20 @@ const handleSubmit = async (e) => {
                 className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                 placeholder="Explain what this form is for and provide any instructions for filling it out..."
               />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">
+                Notification Email(s)
+              </label>
+              <input
+                type="text"
+                value={formData.notificationEmails}
+                onChange={(e) => setFormData({ ...formData, notificationEmails: e.target.value })}
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                placeholder="e.g., hr@company.com (comma-separated for multiple)"
+              />
+              <p className="text-xs text-gray-500 mt-1">Enter email address(es) to receive detailed email notifications whenever someone fills out this form.</p>
             </div>
           </div>
           

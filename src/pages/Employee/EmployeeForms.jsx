@@ -129,7 +129,7 @@ const EmployeeForms = () => {
       <div className="bg-gradient-to-r from-pink-600 to-purple-600 rounded-2xl p-6 text-white shadow-lg">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h1 className="text-2xl font-bold">Employee Forms</h1>
+            <h1 className="text-2xl font-bold">Company Forms</h1>
             <p className="text-pink-100 mt-1">View and submit company forms</p>
           </div>
           <div className="bg-white/20 rounded-lg px-4 py-2 flex items-center gap-2">
@@ -179,36 +179,28 @@ const EmployeeForms = () => {
                     </p>
                   </div>
                   
-                  {status === 'approved' ? (
-                    <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-                      <p className="text-sm text-green-700 flex items-center gap-2">
-                        <FaCheckCircle className="w-4 h-4" />
-                        ✓ Form approved by HR
+                  {status && (
+                    <div className={`border rounded-lg p-2.5 mb-3 ${
+                      status === 'approved' ? 'bg-green-50 border-green-200 text-green-700' :
+                      status === 'pending' ? 'bg-yellow-50 border-yellow-200 text-yellow-700' :
+                      'bg-red-50 border-red-200 text-red-700'
+                    }`}>
+                      <p className="text-xs font-semibold flex items-center gap-1.5">
+                        {status === 'approved' && <FaCheckCircle className="w-3.5 h-3.5" />}
+                        {status === 'pending' && <FaClock className="w-3.5 h-3.5" />}
+                        {status === 'rejected' && <FaTimesCircle className="w-3.5 h-3.5" />}
+                        Previous submission: {status.charAt(0).toUpperCase() + status.slice(1)}
                       </p>
                     </div>
-                  ) : status === 'pending' ? (
-                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-                      <p className="text-sm text-yellow-700 flex items-center gap-2">
-                        <FaClock className="w-4 h-4" />
-                        Waiting for HR approval
-                      </p>
-                    </div>
-                  ) : status === 'rejected' ? (
-                    <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                      <p className="text-sm text-red-700 flex items-center gap-2">
-                        <FaTimesCircle className="w-4 h-4" />
-                        Form rejected by HR
-                      </p>
-                    </div>
-                  ) : (
-                    <button
-                      onClick={() => openFormModal(form)}
-                      className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-2.5 rounded-xl hover:from-blue-700 hover:to-blue-800 flex items-center justify-center gap-2 transition-all"
-                    >
-                      <FaPaperPlane className="w-4 h-4" />
-                      Fill Form
-                    </button>
                   )}
+                  
+                  <button
+                    onClick={() => openFormModal(form)}
+                    className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-2.5 rounded-xl hover:from-blue-700 hover:to-blue-800 flex items-center justify-center gap-2 transition-all"
+                  >
+                    <FaPaperPlane className="w-4 h-4" />
+                    Fill Form
+                  </button>
                 </div>
               </div>
             );

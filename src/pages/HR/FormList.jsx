@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { FaPlus, FaFileAlt, FaEye, FaClipboardList } from 'react-icons/fa';
+import { FaPlus, FaFileAlt, FaEye, FaClipboardList, FaTrash } from 'react-icons/fa';
 import formService from '../../services/formService';
 import { useRole } from '../../context/RoleContext';
 import toast from 'react-hot-toast';
@@ -26,6 +26,21 @@ const FormList = () => {
       toast.error('Failed to load forms');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDeleteForm = async (formId) => {
+    if (!window.confirm("Are you sure you want to delete this form?")) {
+      return;
+    }
+    
+    try {
+      await formService.deleteForm(formId);
+      toast.success("Form deleted successfully!");
+      fetchForms();
+    } catch (error) {
+      console.error("Error deleting form:", error);
+      toast.error(error.response?.data?.message || "Failed to delete form");
     }
   };
 
@@ -69,11 +84,20 @@ const FormList = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {forms.map((form) => (
-            <div key={form._id} className="bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-lg transition-all p-6">
+            <div key={form._id} className="bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-lg transition-all p-6 relative group">
               <div className="flex items-start justify-between mb-3">
                 <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
                   <FaFileAlt className="w-6 h-6 text-blue-600" />
                 </div>
+                {isHR && (
+                  <button
+                    onClick={() => handleDeleteForm(form._id)}
+                    className="text-red-500 hover:text-red-700 p-2 rounded-lg hover:bg-red-50 transition-colors"
+                    title="Delete Form"
+                  >
+                    <FaTrash className="w-4 h-4" />
+                  </button>
+                )}
               </div>
               <h3 className="text-lg font-semibold text-gray-800 mb-1">{form.title}</h3>
               <p className="text-sm text-gray-500 mb-4">{form.description || 'No description'}</p>

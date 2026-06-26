@@ -1,310 +1,221 @@
-// src/pages/HR/HRDashboard.jsx
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { 
-  FaFileAlt, 
-  FaClipboardList, 
-  FaPlus, 
-  FaEye, 
-  FaCheckCircle,
-  FaClock,
-  FaUsers,
-  FaUserPlus,
-  FaBuilding
+import {
+  FaFileAlt, FaClipboardList, FaPlus, FaEye,
+  FaCheckCircle, FaClock, FaUsers, FaUserPlus, FaArrowRight,
 } from 'react-icons/fa';
 import formService from '../../services/formService';
-import { useRole } from '../../context/RoleContext';
 import toast from 'react-hot-toast';
 
+const STATUS_STYLES = {
+  pending:  "bg-amber-50 text-amber-700 ring-1 ring-amber-200",
+  approved: "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200",
+  rejected: "bg-red-50 text-red-600 ring-1 ring-red-200",
+};
+
+const StatCard = ({ icon: Icon, label, value, accent, linkTo, linkLabel }) => (
+  <div className={`bg-white rounded-xl border-l-4 ${accent} shadow-sm p-5`}>
+    <div className="flex items-center justify-between mb-3">
+      <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">{label}</p>
+      <div className="w-9 h-9 bg-slate-50 rounded-lg flex items-center justify-center">
+        <Icon className="w-4 h-4 text-slate-400" />
+      </div>
+    </div>
+    <p className="text-2xl font-bold text-slate-800">{value}</p>
+    {linkTo && (
+      <Link to={linkTo} className="mt-2 inline-flex items-center gap-1 text-xs text-blue-600 font-medium hover:underline">
+        {linkLabel} <FaArrowRight className="w-2.5 h-2.5" />
+      </Link>
+    )}
+  </div>
+);
+
 const HRDashboard = () => {
-  const [forms, setForms] = useState([]);
   const [submissions, setSubmissions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
-    totalForms: 0,
-    pendingSubmissions: 0,
-    approvedSubmissions: 0,
-    rejectedSubmissions: 0,
-    totalSubmissions: 0
+    totalForms: 0, pendingSubmissions: 0,
+    approvedSubmissions: 0, totalSubmissions: 0,
   });
-  const { userRole } = useRole();
 
-  useEffect(() => {
-    fetchDashboardData();
-  }, []);
+  useEffect(() => { fetchDashboardData(); }, []);
 
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      
-      // Fetch all forms
-      const formsResponse = await formService.getAllForms();
-      const formsList = formsResponse.data.forms || [];
-      setForms(formsList);
-      
-      // Fetch all submissions
-      const submissionsResponse = await formService.getAllSubmissions();
-      const submissionsList = submissionsResponse.data.submissions || [];
-      setSubmissions(submissionsList);
-      
-      // Calculate statistics
-      const pending = submissionsList.filter(s => s.status === 'pending').length;
-      const approved = submissionsList.filter(s => s.status === 'approved').length;
-      const rejected = submissionsList.filter(s => s.status === 'rejected').length;
-      
+      const [formsRes, subRes] = await Promise.all([
+        formService.getAllForms(),
+        formService.getAllSubmissions(),
+      ]);
+      const formsList = formsRes.data.forms || [];
+      const subList   = subRes.data.submissions || [];
+      setSubmissions(subList);
       setStats({
-        totalForms: formsList.length,
-        pendingSubmissions: pending,
-        approvedSubmissions: approved,
-        rejectedSubmissions: rejected,
-        totalSubmissions: submissionsList.length
+        totalForms:          formsList.length,
+        pendingSubmissions:  subList.filter(s => s.status === 'pending').length,
+        approvedSubmissions: subList.filter(s => s.status === 'approved').length,
+        totalSubmissions:    subList.length,
       });
-      
-    } catch (error) {
-      console.error('Failed to fetch dashboard data:', error);
+    } catch {
       toast.error('Failed to load dashboard data');
     } finally {
       setLoading(false);
     }
   };
 
-  const getRecentSubmissions = () => {
-    return submissions.slice(0, 5);
-  };
+  const recent = submissions.slice(0, 5);
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-96">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+      <div className="space-y-4 animate-pulse">
+        <div className="h-24 bg-white rounded-xl" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[1,2,3,4].map(i => <div key={i} className="h-28 bg-white rounded-xl" />)}
+        </div>
+        <div className="h-48 bg-white rounded-xl" />
       </div>
     );
   }
 
   return (
-    <div className="space-y-6 p-6">
-      {/* Welcome Section */}
-      <div className="bg-gradient-to-r from-pink-600 to-purple-600 rounded-2xl p-6 text-white">
-        <div className="flex justify-between items-center">
+    <div className="space-y-5">
+      {/* Hero */}
+      <div className="bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 rounded-xl p-5 sm:p-6 text-white relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-48 h-48 bg-white/5 rounded-full blur-3xl translate-x-1/3 -translate-y-1/3 pointer-events-none" />
+        <div className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
-            <h1 className="text-2xl font-bold">HR Dashboard</h1>
-            <p className="text-pink-100 mt-1">Manage employee forms, applications, and submissions</p>
+            <h1 className="text-xl sm:text-2xl font-bold">HR Dashboard</h1>
+            <p className="text-pink-200 text-sm mt-1">Manage employee forms, applications, and submissions</p>
           </div>
-          <div className="bg-white/20 rounded-lg px-4 py-2 flex items-center gap-2">
+          <div className="inline-flex items-center gap-2 bg-white/15 rounded-lg px-4 py-2 self-start sm:self-auto">
             <FaUsers className="w-4 h-4" />
             <span className="text-sm font-medium">HR Portal</span>
           </div>
         </div>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white rounded-xl shadow-sm p-5 border-l-4 border-blue-500">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-500 text-sm">Total Forms</p>
-              <p className="text-2xl font-bold text-gray-800">{stats.totalForms}</p>
-            </div>
-            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-              <FaFileAlt className="w-5 h-5 text-blue-600" />
-            </div>
-          </div>
-          <Link to="/forms" className="text-xs text-blue-600 mt-2 inline-block hover:underline">
-            View all forms →
-          </Link>
-        </div>
-
-        <div className="bg-white rounded-xl shadow-sm p-5 border-l-4 border-yellow-500">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-500 text-sm">Pending Reviews</p>
-              <p className="text-2xl font-bold text-yellow-600">{stats.pendingSubmissions}</p>
-            </div>
-            <div className="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
-              <FaClock className="w-5 h-5 text-yellow-600" />
-            </div>
-          </div>
-          <Link to="/submissions" className="text-xs text-blue-600 mt-2 inline-block hover:underline">
-            Review now →
-          </Link>
-        </div>
-
-        <div className="bg-white rounded-xl shadow-sm p-5 border-l-4 border-green-500">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-500 text-sm">Approved</p>
-              <p className="text-2xl font-bold text-green-600">{stats.approvedSubmissions}</p>
-            </div>
-            <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-              <FaCheckCircle className="w-5 h-5 text-green-600" />
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-xl shadow-sm p-5 border-l-4 border-purple-500">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-500 text-sm">Total Submissions</p>
-              <p className="text-2xl font-bold text-purple-600">{stats.totalSubmissions}</p>
-            </div>
-            <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-              <FaClipboardList className="w-5 h-5 text-purple-600" />
-            </div>
-          </div>
-        </div>
+      {/* Stats */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard icon={FaFileAlt}       label="Total Forms"       value={stats.totalForms}           accent="border-blue-400"    linkTo="/forms"       linkLabel="View forms" />
+        <StatCard icon={FaClock}         label="Pending Reviews"   value={stats.pendingSubmissions}   accent="border-amber-400"   linkTo="/submissions" linkLabel="Review now" />
+        <StatCard icon={FaCheckCircle}   label="Approved"          value={stats.approvedSubmissions}  accent="border-emerald-400" />
+        <StatCard icon={FaClipboardList} label="Total Submissions" value={stats.totalSubmissions}     accent="border-purple-400"  />
       </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Create Form Card */}
-        <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-6 text-white">
-          <FaPlus className="w-8 h-8 mb-3" />
-          <h3 className="text-lg font-bold mb-1">Create New Form</h3>
-          <p className="text-blue-100 text-sm mb-4">Design application forms, request forms, and surveys</p>
-          <Link
-            to="/forms/builder"
-            className="inline-flex items-center gap-2 bg-white text-blue-600 px-4 py-2 rounded-lg hover:bg-blue-50 transition-colors text-sm font-medium"
-          >
-            <FaPlus className="w-4 h-4" />
-            Create Form
-          </Link>
-        </div>
-
-        {/* Review Submissions Card */}
-        <div className="bg-gradient-to-br from-yellow-500 to-orange-500 rounded-xl p-6 text-white">
-          <FaEye className="w-8 h-8 mb-3" />
-          <h3 className="text-lg font-bold mb-1">Review Submissions</h3>
-          <p className="text-yellow-100 text-sm mb-4">
-            {stats.pendingSubmissions} pending submission{stats.pendingSubmissions !== 1 ? 's' : ''} waiting for review
-          </p>
-          <Link
-            to="/submissions"
-            className="inline-flex items-center gap-2 bg-white text-orange-600 px-4 py-2 rounded-lg hover:bg-orange-50 transition-colors text-sm font-medium"
-          >
-            <FaClipboardList className="w-4 h-4" />
-            Review Now
-          </Link>
-        </div>
-
-        {/* Manage Forms Card */}
-        <div className="bg-gradient-to-br from-green-500 to-teal-500 rounded-xl p-6 text-white">
-          <FaFileAlt className="w-8 h-8 mb-3" />
-          <h3 className="text-lg font-bold mb-1">Manage Forms</h3>
-          <p className="text-green-100 text-sm mb-4">{stats.totalForms} active form{stats.totalForms !== 1 ? 's' : ''} available</p>
-          <Link
-            to="/forms"
-            className="inline-flex items-center gap-2 bg-white text-green-600 px-4 py-2 rounded-lg hover:bg-green-50 transition-colors text-sm font-medium"
-          >
-            <FaFileAlt className="w-4 h-4" />
-            Manage Forms
-          </Link>
-        </div>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {[
+          { gradient: "from-blue-500 to-blue-600",     Icon: FaPlus,     title: "Create New Form",      desc: "Design application forms, request forms, and surveys",                            to: "/forms/builder", btn: "Create Form",   clr: "text-blue-600"    },
+          { gradient: "from-amber-500 to-orange-500",  Icon: FaEye,      title: "Review Submissions",   desc: `${stats.pendingSubmissions} pending submission${stats.pendingSubmissions !== 1 ? 's' : ''} waiting`, to: "/submissions",   btn: "Review Now",    clr: "text-orange-600"  },
+          { gradient: "from-emerald-500 to-teal-500",  Icon: FaFileAlt,  title: "Manage Forms",         desc: `${stats.totalForms} active form${stats.totalForms !== 1 ? 's' : ''} available`, to: "/forms",         btn: "Manage Forms",  clr: "text-emerald-600" },
+        ].map(({ gradient, Icon, title, desc, to, btn, clr }) => (
+          <div key={to} className={`bg-gradient-to-br ${gradient} rounded-xl p-5 text-white flex flex-col`}>
+            <Icon className="w-7 h-7 mb-3 opacity-90" />
+            <h3 className="text-base font-bold mb-1">{title}</h3>
+            <p className="text-white/70 text-sm mb-4 leading-relaxed flex-1">{desc}</p>
+            <Link
+              to={to}
+              className={`inline-flex items-center gap-2 bg-white ${clr} self-start px-4 py-2 rounded-lg text-sm font-semibold hover:bg-white/90 transition-colors`}
+            >
+              <Icon className="w-3.5 h-3.5" /> {btn}
+            </Link>
+          </div>
+        ))}
       </div>
 
-      {/* Recent Submissions Table */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+      {/* Recent Submissions */}
+      <div className="bg-white rounded-xl border border-slate-100 shadow-sm">
+        <div className="flex items-center justify-between px-5 sm:px-6 py-4 border-b border-slate-100">
           <div>
-            <h2 className="text-lg font-semibold text-gray-800">Recent Submissions</h2>
-            <p className="text-sm text-gray-500">Latest form submissions from employees</p>
+            <h2 className="text-sm font-semibold text-slate-800">Recent Submissions</h2>
+            <p className="text-xs text-slate-400 mt-0.5">Latest form submissions from employees</p>
           </div>
-          <Link to="/submissions" className="text-sm text-blue-600 hover:text-blue-700">
-            View All →
+          <Link to="/submissions" className="text-xs text-blue-600 font-medium hover:text-blue-700 flex items-center gap-1">
+            View All <FaArrowRight className="w-2.5 h-2.5" />
           </Link>
         </div>
-        
-        <div className="overflow-x-auto">
-          {getRecentSubmissions().length === 0 ? (
-            <div className="text-center py-12">
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                <FaClipboardList className="w-8 h-8 text-gray-400" />
-              </div>
-              <p className="text-gray-500">No submissions yet</p>
-              <p className="text-sm text-gray-400 mt-1">When employees submit forms, they will appear here</p>
+
+        {recent.length === 0 ? (
+          <div className="text-center py-12 px-4">
+            <div className="w-14 h-14 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-3">
+              <FaClipboardList className="w-6 h-6 text-slate-300" />
             </div>
-          ) : (
-            <table className="w-full">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="text-left py-3 px-6 text-xs font-semibold text-gray-500 uppercase">Form</th>
-                  <th className="text-left py-3 px-6 text-xs font-semibold text-gray-500 uppercase">Submitted By</th>
-                  <th className="text-left py-3 px-6 text-xs font-semibold text-gray-500 uppercase">Date</th>
-                  <th className="text-left py-3 px-6 text-xs font-semibold text-gray-500 uppercase">Status</th>
-                  <th className="text-left py-3 px-6 text-xs font-semibold text-gray-500 uppercase">Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {getRecentSubmissions().map((submission) => (
-                  <tr key={submission._id} className="hover:bg-gray-50">
-                    <td className="py-3 px-6">
-                      <span className="text-sm text-gray-800">{submission.form?.title || 'Unknown Form'}</span>
-                    </td>
-                    <td className="py-3 px-6">
-                      <span className="text-sm text-gray-600">{submission.submittedBy?.name || 'Unknown'}</span>
-                    </td>
-                    <td className="py-3 px-6">
-                      <span className="text-sm text-gray-500">
-                        {new Date(submission.createdAt).toLocaleDateString()}
-                      </span>
-                    </td>
-                    <td className="py-3 px-6">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        submission.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
-                        submission.status === 'approved' ? 'bg-green-100 text-green-700' :
-                        'bg-red-100 text-red-700'
-                      }`}>
-                        {submission.status || 'pending'}
-                      </span>
-                    </td>
-                    <td className="py-3 px-6">
-                      <Link
-                        to="/submissions"
-                        className="text-blue-600 hover:text-blue-700 text-sm"
-                      >
-                        Review
-                      </Link>
-                    </td>
+            <p className="text-sm font-medium text-slate-600">No submissions yet</p>
+            <p className="text-xs text-slate-400 mt-1">When employees submit forms, they will appear here</p>
+          </div>
+        ) : (
+          <>
+            {/* Table — sm+ */}
+            <div className="hidden sm:block overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-slate-50">
+                  <tr>
+                    {["Form", "Submitted By", "Date", "Status", "Action"].map(h => (
+                      <th key={h} className="text-left py-3 px-5 text-xs font-semibold text-slate-500 uppercase tracking-wide">{h}</th>
+                    ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </div>
+                </thead>
+                <tbody className="divide-y divide-slate-50">
+                  {recent.map((s) => (
+                    <tr key={s._id} className="hover:bg-slate-50/70 transition-colors">
+                      <td className="py-3.5 px-5 text-sm font-medium text-slate-800">{s.form?.title || 'Unknown Form'}</td>
+                      <td className="py-3.5 px-5 text-sm text-slate-600">{s.submittedBy?.name || 'Unknown'}</td>
+                      <td className="py-3.5 px-5 text-sm text-slate-400">{new Date(s.createdAt).toLocaleDateString('en-IN')}</td>
+                      <td className="py-3.5 px-5">
+                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${STATUS_STYLES[s.status] || STATUS_STYLES.pending}`}>
+                          {s.status || 'pending'}
+                        </span>
+                      </td>
+                      <td className="py-3.5 px-5">
+                        <Link to="/submissions" className="text-sm text-blue-600 hover:text-blue-700 font-medium">Review</Link>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Cards — mobile */}
+            <ul className="sm:hidden divide-y divide-slate-50">
+              {recent.map((s) => (
+                <li key={s._id} className="px-5 py-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-slate-800 truncate">{s.form?.title || 'Unknown Form'}</p>
+                      <p className="text-xs text-slate-500 mt-0.5">{s.submittedBy?.name || 'Unknown'}</p>
+                      <p className="text-xs text-slate-400 mt-0.5">{new Date(s.createdAt).toLocaleDateString('en-IN')}</p>
+                    </div>
+                    <span className={`flex-shrink-0 inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${STATUS_STYLES[s.status] || STATUS_STYLES.pending}`}>
+                      {s.status || 'pending'}
+                    </span>
+                  </div>
+                  <Link to="/submissions" className="mt-2 text-xs text-blue-600 font-medium">Review →</Link>
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
       </div>
 
-      {/* Quick Tips for HR */}
-      <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-5">
-        <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
-          <FaUserPlus className="w-4 h-4 text-purple-600" />
-          HR Quick Guide
+      {/* HR Guide */}
+      <div className="bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-100 rounded-xl p-5">
+        <h3 className="font-semibold text-slate-800 text-sm mb-4 flex items-center gap-2">
+          <FaUserPlus className="w-4 h-4 text-purple-600" /> HR Quick Guide
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="flex items-start gap-3">
-            <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-              <span className="text-xs text-blue-600 font-bold">1</span>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {[
+            { n: 1, c: "bg-blue-100 text-blue-700",    t: "Create Application Forms",  d: "Go to Forms → Create Form to design leave requests, expense claims, etc." },
+            { n: 2, c: "bg-amber-100 text-amber-700",  t: "Review Submissions",         d: "Check pending submissions and approve/reject with feedback" },
+            { n: 3, c: "bg-emerald-100 text-emerald-700", t: "Track History",           d: "View all submissions and approval history in one place" },
+          ].map(({ n, c, t, d }) => (
+            <div key={n} className="flex items-start gap-3">
+              <div className={`w-7 h-7 ${c} rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold`}>{n}</div>
+              <div>
+                <p className="text-sm font-semibold text-slate-800">{t}</p>
+                <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">{d}</p>
+              </div>
             </div>
-            <div>
-              <p className="text-sm font-medium text-gray-800">Create Application Forms</p>
-              <p className="text-xs text-gray-600">Go to Forms → Create Form to design leave requests, expense claims, etc.</p>
-            </div>
-          </div>
-          <div className="flex items-start gap-3">
-            <div className="w-6 h-6 bg-yellow-100 rounded-full flex items-center justify-center flex-shrink-0">
-              <span className="text-xs text-yellow-600 font-bold">2</span>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-800">Review Submissions</p>
-              <p className="text-xs text-gray-600">Check pending submissions and approve/reject with feedback</p>
-            </div>
-          </div>
-          <div className="flex items-start gap-3">
-            <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
-              <span className="text-xs text-green-600 font-bold">3</span>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-800">Track History</p>
-              <p className="text-xs text-gray-600">View all submissions and approval history in one place</p>
-            </div>
-          </div>
+          ))}
         </div>
       </div>
     </div>
