@@ -155,10 +155,10 @@ const DynamicForm = () => {
       </button>
       
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-5">
+        <div className="bg-gradient-to-r from-slate-900 via-blue-950 to-indigo-950 px-6 py-5">
           <h1 className="text-xl font-bold text-white">{form?.title}</h1>
           {form?.description && (
-            <p className="text-blue-100 text-sm mt-1">{form.description}</p>
+            <p className="text-blue-200 text-sm mt-1">{form.description}</p>
           )}
         </div>
         
@@ -176,7 +176,7 @@ const DynamicForm = () => {
           <button
             type="submit"
             disabled={submitting}
-            className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white py-3 rounded-xl hover:from-green-700 hover:to-green-800 transition-all font-medium shadow-md disabled:opacity-50 flex items-center justify-center gap-2"
+            className="w-full bg-blue-600 text-white py-3 rounded-xl hover:bg-blue-700 transition-all font-medium shadow-md disabled:opacity-50 flex items-center justify-center gap-2"
           >
             {submitting ? <FaSpinner className="animate-spin w-4 h-4" /> : <FaPaperPlane className="w-4 h-4" />}
             {submitting ? 'Submitting...' : 'Submit Form'}

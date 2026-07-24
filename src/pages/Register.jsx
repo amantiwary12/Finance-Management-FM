@@ -45,14 +45,14 @@ const Register = () => {
   return (
     <div className="min-h-screen flex">
       {/* ── Left Panel ─────────────────────────────────────── */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-slate-900 via-indigo-950 to-blue-950 flex-col justify-between p-12 relative overflow-hidden">
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-950 flex-col justify-between p-12 relative overflow-hidden">
         {/* Background glows */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-600 opacity-10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-80 h-80 bg-blue-600 opacity-10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2 pointer-events-none" />
+        <div className="absolute top-0 right-0 w-96 h-96 bg-blue-600 opacity-10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-80 h-80 bg-indigo-600 opacity-10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2 pointer-events-none" />
 
         {/* Logo */}
         <div className="relative flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-blue-500 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-900/50">
+          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-xl flex items-center justify-center shadow-lg shadow-blue-900/50">
             <FaChartLine className="text-white w-5 h-5" />
           </div>
           <span className="text-white text-xl font-extrabold tracking-tight">FinanceFlow</span>
@@ -63,7 +63,7 @@ const Register = () => {
           <div>
             <h2 className="text-4xl font-extrabold text-white leading-tight mb-3">
               Set up your company<br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-400">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400">
                 in under a minute
               </span>
             </h2>
@@ -80,8 +80,8 @@ const Register = () => {
               'No credit card required',
             ].map((item, i) => (
               <li key={i} className="flex items-center gap-3 text-slate-300">
-                <span className="w-5 h-5 rounded-full bg-indigo-500/20 border border-indigo-500/40 flex items-center justify-center flex-shrink-0">
-                  <FaCheck className="w-2.5 h-2.5 text-indigo-400" />
+                <span className="w-5 h-5 rounded-full bg-blue-500/20 border border-blue-500/40 flex items-center justify-center flex-shrink-0">
+                  <FaCheck className="w-2.5 h-2.5 text-blue-400" />
                 </span>
                 {item}
               </li>
@@ -93,7 +93,7 @@ const Register = () => {
         <div className="relative border-t border-white/10 pt-6">
           <p className="text-slate-500 text-sm">
             Already have an account?{' '}
-            <Link to="/login" className="text-indigo-400 hover:text-indigo-300 font-medium transition-colors">
+            <Link to="/login" className="text-blue-400 hover:text-blue-300 font-medium transition-colors">
               Sign in →
             </Link>
           </p>
@@ -105,7 +105,7 @@ const Register = () => {
         <div className="w-full max-w-md">
           {/* Mobile logo */}
           <div className="flex lg:hidden items-center gap-2.5 mb-10">
-            <div className="w-9 h-9 bg-gradient-to-br from-indigo-600 to-blue-600 rounded-xl flex items-center justify-center">
+            <div className="w-9 h-9 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center">
               <FaChartLine className="text-white w-4 h-4" />
             </div>
             <span className="text-gray-900 text-lg font-extrabold">FinanceFlow</span>
@@ -132,7 +132,7 @@ const Register = () => {
                   name="companyName"
                   value={formData.companyName}
                   onChange={handleChange}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-sm bg-gray-50 focus:bg-white"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm bg-gray-50 focus:bg-white"
                   placeholder="Acme Corp"
                   required
                   disabled={isLoading}
@@ -155,7 +155,7 @@ const Register = () => {
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-sm bg-gray-50 focus:bg-white"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm bg-gray-50 focus:bg-white"
                   placeholder="John Doe"
                   required
                   disabled={isLoading}
@@ -177,7 +177,7 @@ const Register = () => {
                   name="mobileNumber"
                   value={formData.mobileNumber}
                   onChange={handleChange}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-sm bg-gray-50 focus:bg-white"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm bg-gray-50 focus:bg-white"
                   placeholder="9876543210"
                   autoComplete="tel"
                   required
@@ -201,7 +201,7 @@ const Register = () => {
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
-                  className="w-full pl-10 pr-11 py-3 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-sm bg-gray-50 focus:bg-white"
+                  className="w-full pl-10 pr-11 py-3 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm bg-gray-50 focus:bg-white"
                   placeholder="Min. 6 characters"
                   autoComplete="new-password"
                   required
@@ -224,7 +224,7 @@ const Register = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white font-semibold py-3 rounded-xl transition-all text-sm shadow-md shadow-indigo-600/25 disabled:cursor-not-allowed disabled:shadow-none flex items-center justify-center gap-2 mt-2"
+              className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold py-3 rounded-xl transition-all text-sm shadow-md shadow-blue-600/25 disabled:cursor-not-allowed disabled:shadow-none flex items-center justify-center gap-2 mt-2"
             >
               {isLoading ? (
                 <>
@@ -240,7 +240,7 @@ const Register = () => {
           {/* Footer */}
           <p className="text-center mt-7 text-sm text-gray-500">
             Already have an account?{' '}
-            <Link to="/login" className="text-indigo-600 hover:text-indigo-700 font-semibold transition-colors">
+            <Link to="/login" className="text-blue-600 hover:text-blue-700 font-semibold transition-colors">
               Sign in
             </Link>
           </p>

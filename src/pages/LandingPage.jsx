@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import {
   FaChartLine, FaUsers, FaProjectDiagram, FaWallet,
   FaBell, FaFileExport, FaArrowRight, FaCheck,
-  FaShieldAlt, FaChartBar, FaClipboardList,
+  FaShieldAlt, FaChartBar, FaClipboardList, FaCalendarCheck, FaQrcode,
 } from 'react-icons/fa';
 
 const features = [
@@ -37,8 +37,8 @@ const features = [
   },
   {
     icon: FaBell,
-    title: 'Smart Notifications',
-    desc: 'Automatic alerts when budgets are exceeded, transactions are created, or projects reach milestones.',
+    title: 'Real Email + In-App Alerts',
+    desc: 'Budget overages, project milestones, and form submissions trigger both an in-app notification and a real email to the right people.',
     color: 'text-red-600',
     bg: 'bg-red-50',
   },
@@ -52,9 +52,23 @@ const features = [
   {
     icon: FaClipboardList,
     title: 'HR Form Builder',
-    desc: 'HR can create custom forms, employees fill them out. Submissions are tracked in one place.',
+    desc: 'HR creates and edits custom forms anytime. Every employee can view and fill them, with submissions tracked in one place.',
     color: 'text-indigo-600',
     bg: 'bg-indigo-50',
+  },
+  {
+    icon: FaQrcode,
+    title: 'QR Code Form Sharing',
+    desc: 'Turn any form into a QR code. Anyone who scans it can open and fill the form instantly — no account or login required.',
+    color: 'text-violet-600',
+    bg: 'bg-violet-50',
+  },
+  {
+    icon: FaCalendarCheck,
+    title: 'Attendance Tracking',
+    desc: 'HR uploads a spreadsheet and every employee gets a day-by-day monthly calendar — present, absent, half-day, or late, colour-coded automatically.',
+    color: 'text-amber-600',
+    bg: 'bg-amber-50',
   },
   {
     icon: FaShieldAlt,
@@ -117,12 +131,12 @@ const roles = [
     badge: 'bg-yellow-100 text-yellow-700',
     tagline: 'People & forms',
     perms: [
-      'Build custom HR forms',
-      'Manage form submissions',
-      'View all employee forms',
+      'Build & edit custom forms',
+      'Share forms via QR code',
+      'Review form submissions',
+      'Upload attendance sheets',
       'Access HR dashboard',
       'Read-only financial view',
-      'Send notifications',
     ],
   },
   {
@@ -132,10 +146,10 @@ const roles = [
     perms: [
       'Log personal transactions',
       'View own transactions only',
-      'Submit HR forms',
+      'Fill out company forms',
+      'View monthly attendance calendar',
       'View project list',
       'Personal dashboard',
-      'Receive notifications',
     ],
   },
   {
@@ -248,7 +262,7 @@ const LandingPage = () => {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             {[
               { value: '7', label: 'User Roles' },
-              { value: '9+', label: 'Core Features' },
+              { value: '11+', label: 'Core Features' },
               { value: 'Real-Time', label: 'Analytics & Charts' },
               { value: '100%', label: 'Data Isolated Per Company' },
             ].map((s, i) => (
@@ -405,6 +419,24 @@ const LandingPage = () => {
                   'Click "Add User" and enter the person\'s name, mobile number, and password.',
                   'Assign them a role: Admin, Finance Manager, Manager, HR, Employee, or Viewer.',
                   'They can log in immediately using their mobile number and password.',
+                ],
+              },
+              {
+                title: 'Sharing a Form via QR Code (HR only)',
+                steps: [
+                  'Build a form from Forms → Create Form, or open an existing one to edit it.',
+                  'On the Forms list, click the QR icon on any form card.',
+                  'Scan the generated QR code, or copy/download it to print or share however you like.',
+                  'Anyone who scans it can fill and submit the form instantly — no login required — and HR is emailed the response right away.',
+                ],
+              },
+              {
+                title: 'Uploading & Viewing Attendance',
+                steps: [
+                  'HR uploads a daily attendance spreadsheet (Excel/CSV) from the Attendance page, along with each employee\'s working hours.',
+                  'The system automatically works out present, absent, half-day, and late status per day.',
+                  'Every employee sees their own month-by-month calendar, colour-coded per day, on their Attendance page.',
+                  'Days before HR\'s first upload simply show as blank — no guessing, no false absences.',
                 ],
               },
             ].map((section, i) => (

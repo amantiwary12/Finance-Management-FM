@@ -30,7 +30,7 @@ export const RoleProvider = ({ children }) => {
   const canViewAllData = isAdmin() || isManager() || isFinanceManager();
   const canEditData = isAdmin() || isFinanceManager();
   const canDeleteData = isAdmin();
-  const canManageUsers = isAdmin();
+  const canManageUsers = isAdmin() || isHR();
 
   const value = useMemo(() => ({
     user,

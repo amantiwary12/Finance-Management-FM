@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { FaPlus, FaTrash, FaTimes, FaList, FaCalendar, FaHashtag, FaFont, FaSave, FaAlignLeft } from 'react-icons/fa';
 import formService from '../../services/formService';
 import toast from 'react-hot-toast';
 
 const FormBuilder = () => {
   const navigate = useNavigate();
+  const { id } = useParams();
+  const isEditMode = Boolean(id);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -13,7 +15,35 @@ const FormBuilder = () => {
     fields: []
   });
   const [loading, setLoading] = useState(false);
-  
+  const [loadingForm, setLoadingForm] = useState(isEditMode);
+
+  useEffect(() => {
+    if (!isEditMode) return;
+
+    const fetchForm = async () => {
+      try {
+        const response = await formService.getFormById(id);
+        const form = response.data.form;
+        setFormData({
+          title: form.title || '',
+          description: form.description || '',
+          notificationEmails: (form.notificationEmails || []).join(', '),
+          fields: (form.fields || []).map((field, index) => ({
+            ...field,
+            id: `${Date.now()}-${index}`,
+          })),
+        });
+      } catch (error) {
+        console.error('Failed to load form:', error);
+        toast.error('Failed to load form');
+        navigate('/forms');
+      } finally {
+        setLoadingForm(false);
+      }
+    };
+    fetchForm();
+  }, [id, isEditMode, navigate]);
+
   const fieldTypes = [
     { value: 'text', label: 'Short Text', icon: FaFont, placeholder: 'Single line text' },
     { value: 'textarea', label: 'Long Text', icon: FaAlignLeft, placeholder: 'Multiple lines for detailed answers' },
@@ -163,33 +193,41 @@ const handleSubmit = async (e) => {
       notificationEmails: emailsArray,
       fields: cleanFields
     };
-    
-    console.log('Submitting form data:', JSON.stringify(submitData, null, 2));
-    
-    const response = await formService.createForm(submitData);
-    console.log('Form created successfully:', response.data);
-    
-    toast.success('Form created successfully!');
+
+    const response = isEditMode
+      ? await formService.updateForm(id, submitData)
+      : await formService.createForm(submitData);
+    console.log(`Form ${isEditMode ? 'updated' : 'created'} successfully:`, response.data);
+
+    toast.success(`Form ${isEditMode ? 'updated' : 'created'} successfully!`);
     navigate('/forms');
-    
+
   } catch (error) {
-    console.error('Failed to create form:', error);
+    console.error(`Failed to ${isEditMode ? 'update' : 'create'} form:`, error);
     console.error('Error response:', error.response?.data);
-    toast.error(error.response?.data?.message || 'Failed to create form');
+    toast.error(error.response?.data?.message || `Failed to ${isEditMode ? 'update' : 'create'} form`);
   } finally {
     setLoading(false);
   }
 };
 
+  if (loadingForm) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-5xl mx-auto py-8 px-4">
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-5">
-          <h1 className="text-2xl font-bold text-white">Create New Application Form</h1>
-          <p className="text-blue-100 text-sm mt-1">Design forms for employees to submit requests, applications, and more</p>
+        <div className="bg-gradient-to-r from-slate-900 via-blue-950 to-indigo-950 px-6 py-5">
+          <h1 className="text-2xl font-bold text-white">{isEditMode ? 'Edit Application Form' : 'Create New Application Form'}</h1>
+          <p className="text-blue-200 text-sm mt-1">Design forms for employees to submit requests, applications, and more &mdash; visible to every member once published</p>
         </div>
-        
+
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           {/* Basic Information */}
           <div className="space-y-4">
@@ -388,10 +426,12 @@ const handleSubmit = async (e) => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white py-3 rounded-xl hover:from-green-700 hover:to-green-800 transition-all font-medium shadow-md disabled:opacity-50 flex items-center justify-center gap-2"
+              className="w-full bg-blue-600 text-white py-3 rounded-xl hover:bg-blue-700 transition-all font-medium shadow-md disabled:opacity-50 flex items-center justify-center gap-2"
             >
               <FaSave className="w-4 h-4" />
-              {loading ? 'Creating Form...' : 'Publish Form'}
+              {loading
+                ? (isEditMode ? 'Saving Changes...' : 'Creating Form...')
+                : (isEditMode ? 'Save Changes' : 'Publish Form')}
             </button>
           </div>
         </form>

@@ -80,12 +80,12 @@ const HRDashboard = () => {
   return (
     <div className="space-y-5">
       {/* Hero */}
-      <div className="bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 rounded-xl p-5 sm:p-6 text-white relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-48 h-48 bg-white/5 rounded-full blur-3xl translate-x-1/3 -translate-y-1/3 pointer-events-none" />
+      <div className="bg-gradient-to-r from-slate-900 via-blue-950 to-indigo-950 rounded-xl p-5 sm:p-6 text-white relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-48 h-48 bg-blue-500/10 rounded-full blur-3xl translate-x-1/3 -translate-y-1/3 pointer-events-none" />
         <div className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
             <h1 className="text-xl sm:text-2xl font-bold">HR Dashboard</h1>
-            <p className="text-pink-200 text-sm mt-1">Manage employee forms, applications, and submissions</p>
+            <p className="text-blue-300 text-sm mt-1">Manage employee forms, applications, and submissions</p>
           </div>
           <div className="inline-flex items-center gap-2 bg-white/15 rounded-lg px-4 py-2 self-start sm:self-auto">
             <FaUsers className="w-4 h-4" />

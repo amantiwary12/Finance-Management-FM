@@ -126,11 +126,11 @@ const EmployeeForms = () => {
   return (
     <div className="space-y-6 p-4 md:p-6 bg-gray-50 min-h-screen">
       {/* Header */}
-      <div className="bg-gradient-to-r from-pink-600 to-purple-600 rounded-2xl p-6 text-white shadow-lg">
+      <div className="bg-gradient-to-r from-slate-900 via-blue-950 to-indigo-950 rounded-2xl p-6 text-white shadow-lg">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <h1 className="text-2xl font-bold">Company Forms</h1>
-            <p className="text-pink-100 mt-1">View and submit company forms</p>
+            <p className="text-blue-200 mt-1">View and submit company forms</p>
           </div>
           <div className="bg-white/20 rounded-lg px-4 py-2 flex items-center gap-2">
             <FaFileAlt className="w-4 h-4" />
@@ -196,7 +196,7 @@ const EmployeeForms = () => {
                   
                   <button
                     onClick={() => openFormModal(form)}
-                    className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-2.5 rounded-xl hover:from-blue-700 hover:to-blue-800 flex items-center justify-center gap-2 transition-all"
+                    className="w-full bg-blue-600 text-white py-2.5 rounded-xl hover:bg-blue-700 flex items-center justify-center gap-2 transition-all"
                   >
                     <FaPaperPlane className="w-4 h-4" />
                     Fill Form

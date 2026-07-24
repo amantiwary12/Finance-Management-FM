@@ -5,7 +5,7 @@ import { useRole } from "../../context/RoleContext";
 import {
   FaTachometerAlt, FaProjectDiagram, FaMoneyBillWave,
   FaChartPie, FaBell, FaSignOutAlt, FaUsers, FaBuilding,
-  FaFileAlt, FaChartLine, FaTimes,
+  FaFileAlt, FaChartLine, FaTimes, FaCalendarCheck,
 } from "react-icons/fa";
 
 const ROLE_BADGE = {
@@ -31,6 +31,7 @@ const Sidebar = ({ isOpen, onClose }) => {
   if (isAdmin || isManager || isFinanceManager) {
     menuItems.push({ path: "/budget", icon: FaChartPie, label: "Budget" });
   }
+  menuItems.push({ path: "/attendance", icon: FaCalendarCheck, label: "Attendance" });
   menuItems.push({ path: "/notifications", icon: FaBell, label: "Notifications" });
   if (canManageUsers) {
     menuItems.push({ path: "/users", icon: FaUsers, label: "User Management" });

@@ -85,6 +85,13 @@ const TransactionForm = ({ isOpen, onClose, onSubmit, projects, budgetCategories
       setIsSubmitting(false);
       return;
     }
+
+    // "Other" category needs a description of what the transaction was for
+    if (formData.category === 'Other' && !formData.note.trim()) {
+      toast.error('Please describe what this transaction was for');
+      setIsSubmitting(false);
+      return;
+    }
     
     // Validate date
     if (!formData.date) {
@@ -224,11 +231,29 @@ const TransactionForm = ({ isOpen, onClose, onSubmit, projects, budgetCategories
               ))}
             </select>
             <p className="text-xs text-gray-500 mt-1">
-              {isExpense 
+              {isExpense
                 ? 'Expense categories: Food, Travel, Shopping, Transport, Bills, Education, Entertainment, Healthcare, Other'
                 : 'Income categories: Salary, Business, Investment, Other'}
             </p>
           </div>
+
+          {/* "Other" category — require a description of what the transaction was for */}
+          {formData.category === 'Other' && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                What was this transaction for? <span className="text-red-500">*</span>
+              </label>
+              <textarea
+                name="note"
+                value={formData.note}
+                onChange={handleChange}
+                rows="2"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none resize-none"
+                placeholder="e.g., Office chair repair, client dinner, etc."
+                required
+              />
+            </div>
+          )}
 
           {/* Project (Optional) */}
           <div>
@@ -295,20 +320,22 @@ const TransactionForm = ({ isOpen, onClose, onSubmit, projects, budgetCategories
             </div>
           </div>
 
-          {/* Note/Description */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Note (Optional)
-            </label>
-            <textarea
-              name="note"
-              value={formData.note}
-              onChange={handleChange}
-              rows="2"
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none resize-none"
-              placeholder="Add additional details"
-            />
-          </div>
+          {/* Note/Description — the "Other" category has its own required version above */}
+          {formData.category !== 'Other' && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Note (Optional)
+              </label>
+              <textarea
+                name="note"
+                value={formData.note}
+                onChange={handleChange}
+                rows="2"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none resize-none"
+                placeholder="Add additional details"
+              />
+            </div>
+          )}
 
           {/* Receiver - Only for income transactions */}
           {formData.type === 'income' && (

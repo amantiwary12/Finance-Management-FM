@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FaCheck, FaTimes, FaUser, FaClock, FaEye } from 'react-icons/fa';
 import formService from '../../services/formService';
-import userService from '../../services/userService';
 import toast from 'react-hot-toast';
 
 const Submissions = () => {
@@ -10,11 +9,9 @@ const Submissions = () => {
   const [selectedSubmission, setSelectedSubmission] = useState(null);
   const [rejectReason, setRejectReason] = useState('');
   const [showRejectModal, setShowRejectModal] = useState(false);
-  const [users, setUsers] = useState({});
 
   useEffect(() => {
     fetchSubmissions();
-    fetchUsers();
   }, []);
 
   const fetchSubmissions = async () => {
@@ -26,19 +23,6 @@ const Submissions = () => {
       toast.error('Failed to load submissions');
     } finally {
       setLoading(false);
-    }
-  };
-
-  const fetchUsers = async () => {
-    try {
-      const response = await userService.getAllUsers();
-      const userMap = {};
-      response.data.users.forEach(user => {
-        userMap[user._id] = user;
-      });
-      setUsers(userMap);
-    } catch (error) {
-      console.error('Failed to fetch users:', error);
     }
   };
 
@@ -124,18 +108,23 @@ const Submissions = () => {
                   <tr key={submission._id} className="hover:bg-gray-50">
                     <td className="py-4 px-6">
                       <div>
-                        <p className="font-medium text-gray-800">{submission.form?.title || 'Unknown Form'}</p>
+                        <p className="font-medium text-gray-800">{submission.form?.title || 'Deleted Form'}</p>
                       </div>
                     </td>
                     <td className="py-4 px-6">
                       <div className="flex items-center gap-2">
                         <FaUser className="w-3 h-3 text-gray-400" />
                         <span className="text-sm text-gray-700">
-                          {users[submission.submittedBy]?.name || 'Unknown User'}
+                          {submission.submittedBy?.name || submission.guestName || 'Unknown User'}
                         </span>
-                        {users[submission.submittedBy]?.mobileNumber && (
+                        {(submission.submittedBy?.mobileNumber || submission.guestContact) && (
                           <span className="text-xs text-gray-400">
-                            ({users[submission.submittedBy]?.mobileNumber})
+                            ({submission.submittedBy?.mobileNumber || submission.guestContact})
+                          </span>
+                        )}
+                        {!submission.submittedBy && submission.guestName && (
+                          <span className="text-[10px] uppercase tracking-wide bg-purple-100 text-purple-600 px-2 py-0.5 rounded-full">
+                            QR / Public
                           </span>
                         )}
                       </div>
@@ -204,12 +193,12 @@ const Submissions = () => {
             <div className="space-y-4">
               <div className="bg-gray-50 p-4 rounded-lg">
                 <p className="text-sm text-gray-500">Form</p>
-                <p className="font-medium">{selectedSubmission.form?.title}</p>
+                <p className="font-medium">{selectedSubmission.form?.title || 'Deleted Form'}</p>
               </div>
               <div className="bg-gray-50 p-4 rounded-lg">
                 <p className="text-sm text-gray-500">Submitted By</p>
-                <p className="font-medium">{users[selectedSubmission.submittedBy]?.name || 'Unknown'}</p>
-                <p className="text-xs text-gray-400 mt-1">{users[selectedSubmission.submittedBy]?.mobileNumber || 'No mobile number'}</p>
+                <p className="font-medium">{selectedSubmission.submittedBy?.name || selectedSubmission.guestName || 'Unknown'}</p>
+                <p className="text-xs text-gray-400 mt-1">{selectedSubmission.submittedBy?.mobileNumber || selectedSubmission.guestContact || 'No contact info'}</p>
               </div>
               <div className="bg-gray-50 p-4 rounded-lg">
                 <p className="text-sm text-gray-500 mb-2">Responses</p>

@@ -4,7 +4,7 @@ import {
   FaToggleOn, FaToggleOff, FaSync, FaSearch, 
   FaUserPlus, FaKey, FaCheck, FaTimes,
   FaUser, FaPhone, FaBriefcase, FaCalendar, FaBuilding,
-  FaSpinner
+  FaSpinner, FaEnvelope
 } from 'react-icons/fa';
 import userService from '../services/userService';
 import toast from 'react-hot-toast';
@@ -28,11 +28,16 @@ const UserManagement = () => {
   const [formData, setFormData] = useState({
     name: '',
     mobileNumber: '',
+    email: '',
     password: '',
     role: 'Employee'
   });
 
   const roles = ['SuperAdmin', 'Admin', 'FinanceManager', 'Manager', 'HR', 'Employee', 'Viewer'];
+  const isHRUser = currentUserRole === 'HR';
+  // HR cannot create/promote users into Admin or SuperAdmin — privilege-escalation guard
+  const assignableRoles = isHRUser ? roles.filter(r => r !== 'SuperAdmin' && r !== 'Admin') : roles;
+  const isPrivilegedRole = (role) => role === 'SuperAdmin' || role === 'Admin';
 
   useEffect(() => {
     const currentUser = JSON.parse(localStorage.getItem('user'));
@@ -86,6 +91,7 @@ const UserManagement = () => {
         // Update user
         const updateData = {
           name: formData.name,
+          email: formData.email,
           role: formData.role
         };
         await userService.updateUser(editingUser._id, updateData);
@@ -102,6 +108,7 @@ const UserManagement = () => {
       setFormData({
         name: '',
         mobileNumber: '',
+        email: '',
         password: '',
         role: 'Employee'
       });
@@ -185,6 +192,7 @@ const UserManagement = () => {
     setFormData({
       name: '',
       mobileNumber: '',
+      email: '',
       password: '',
       role: 'Employee'
     });
@@ -196,6 +204,7 @@ const UserManagement = () => {
     setFormData({
       name: user.name,
       mobileNumber: user.mobileNumber,
+      email: user.email || '',
       password: '',
       role: user.role
     });
@@ -257,7 +266,7 @@ const UserManagement = () => {
         </div>
         <button
           onClick={openCreateModal}
-          className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-5 py-2.5 rounded-xl hover:from-blue-700 hover:to-blue-800 flex items-center gap-2 shadow-md transition-all"
+          className="bg-blue-600 text-white px-5 py-2.5 rounded-xl hover:bg-blue-700 flex items-center gap-2 shadow-md transition-all"
         >
           <FaUserPlus className="w-4 h-4" />
           Add User
@@ -341,7 +350,7 @@ const UserManagement = () => {
                     <td className="py-4 px-6">
                       <div className="flex items-center gap-3">
                         <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold ${
-                          user.role === 'SuperAdmin' ? 'bg-red-600' : 'bg-gradient-to-r from-blue-500 to-purple-500'
+                          user.role === 'SuperAdmin' ? 'bg-red-600' : 'bg-gradient-to-br from-blue-500 to-indigo-500'
                         }`}>
                           {user.name?.charAt(0).toUpperCase()}
                         </div>
@@ -356,6 +365,12 @@ const UserManagement = () => {
                         <FaPhone className="w-3 h-3 text-gray-400" />
                         <span className="text-gray-700">{user.mobileNumber}</span>
                       </div>
+                      {user.email && (
+                        <div className="flex items-center gap-2 mt-1">
+                          <FaEnvelope className="w-3 h-3 text-gray-400" />
+                          <span className="text-xs text-gray-500">{user.email}</span>
+                        </div>
+                      )}
                     </td>
                     <td className="py-4 px-6">
                       <span className={`px-3 py-1 rounded-full text-xs font-medium ${getRoleColor(user.role)}`}>
@@ -374,41 +389,45 @@ const UserManagement = () => {
                       </div>
                     </td>
                     <td className="py-4 px-6">
-                      <div className="flex items-center justify-center gap-2">
-                        <button
-                          onClick={() => openEditModal(user)}
-                          className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                          title="Edit user"
-                        >
-                          <FaEdit className="w-4 h-4" />
-                        </button>
-                        
-                        <button
-                          onClick={() => openPasswordModal(user)}
-                          className="p-2 text-yellow-600 hover:bg-yellow-50 rounded-lg transition-colors"
-                          title="Reset password"
-                        >
-                          <FaKey className="w-4 h-4" />
-                        </button>
-                        
-                        <button
-                          onClick={() => handleToggleStatus(user)}
-                          className="p-2 text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
-                          title={user.isActive ? 'Deactivate' : 'Activate'}
-                        >
-                          {user.isActive ? <FaToggleOn className="w-5 h-5" /> : <FaToggleOff className="w-5 h-5" />}
-                        </button>
-                        
-                        {user.role !== 'SuperAdmin' && (
+                      {isHRUser && isPrivilegedRole(user.role) ? (
+                        <p className="text-center text-xs text-gray-400">Restricted</p>
+                      ) : (
+                        <div className="flex items-center justify-center gap-2">
                           <button
-                            onClick={() => openDeleteModal(user)}
-                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                            title="Delete user"
+                            onClick={() => openEditModal(user)}
+                            className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                            title="Edit user"
                           >
-                            <FaTrash className="w-4 h-4" />
+                            <FaEdit className="w-4 h-4" />
                           </button>
-                        )}
-                      </div>
+
+                          <button
+                            onClick={() => openPasswordModal(user)}
+                            className="p-2 text-yellow-600 hover:bg-yellow-50 rounded-lg transition-colors"
+                            title="Reset password"
+                          >
+                            <FaKey className="w-4 h-4" />
+                          </button>
+
+                          <button
+                            onClick={() => handleToggleStatus(user)}
+                            className="p-2 text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
+                            title={user.isActive ? 'Deactivate' : 'Activate'}
+                          >
+                            {user.isActive ? <FaToggleOn className="w-5 h-5" /> : <FaToggleOff className="w-5 h-5" />}
+                          </button>
+
+                          {user.role !== 'SuperAdmin' && (
+                            <button
+                              onClick={() => openDeleteModal(user)}
+                              className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                              title="Delete user"
+                            >
+                              <FaTrash className="w-4 h-4" />
+                            </button>
+                          )}
+                        </div>
+                      )}
                     </td>
                   </tr>
                 ))
@@ -475,7 +494,23 @@ const UserManagement = () => {
                   />
                 </div>
               </div>
-              
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                <div className="relative">
+                  <FaEnvelope className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                  <input
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => setFormData({...formData, email: e.target.value})}
+                    className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                    placeholder="name@company.com"
+                    disabled={submitting}
+                  />
+                </div>
+                <p className="text-xs text-gray-500 mt-1">Used to email this user form notifications (e.g. HR alerts, approval requests)</p>
+              </div>
+
               {!editingUser && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Password *</label>
@@ -511,14 +546,17 @@ const UserManagement = () => {
                     className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                     disabled={submitting}
                   >
-                    {roles.map(role => (
+                    {assignableRoles.map(role => (
                       <option key={role} value={role}>{role}</option>
                     ))}
                   </select>
                 </div>
+                {isHRUser && (
+                  <p className="text-xs text-gray-500 mt-1">HR cannot create or promote Admin/SuperAdmin accounts</p>
+                )}
               </div>
-              
-              <button 
+
+              <button
                 type="submit" 
                 disabled={submitting}
                 className="w-full bg-blue-600 text-white py-2.5 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"

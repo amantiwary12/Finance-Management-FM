@@ -51,6 +51,28 @@ const formService = {
     return response;
   },
 
+  // HR: enable/disable public QR sharing for a form
+  setFormPublic: async (formId, isPublic) => {
+    const response = await api.put(`/forms/${formId}/share`, { isPublic });
+    return response;
+  },
+
+  // PUBLIC: fetch a form by its QR/share token — no auth required
+  getPublicForm: async (token) => {
+    const response = await api.get(`/forms/public/${token}`);
+    return response;
+  },
+
+  // PUBLIC: submit a form reached via its QR/share token — no auth required
+  submitPublicForm: async (token, { guestName, guestContact, responses }) => {
+    const response = await api.post(`/submissions/public/${token}`, {
+      guestName,
+      guestContact,
+      responses,
+    });
+    return response;
+  },
+
   // Submit form
   submitForm: async (formId, responses) => {
     const response = await api.post('/submissions', { formId, responses });

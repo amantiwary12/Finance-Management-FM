@@ -44,8 +44,14 @@ const Dashboard = () => {
       budgetService.getBudgets(),
     ]).then(([s, t, b]) => {
       if (s.status === "fulfilled") setSummary(s.value.data?.data || s.value.data || {});
-      if (t.status === "fulfilled") setTransactions(t.value.data?.data || t.value.data || []);
-      if (b.status === "fulfilled") setBudgets((b.value.data?.data || b.value.data || []).slice(0, 4));
+      if (t.status === "fulfilled") {
+        const txData = t.value.data?.transactions || t.value.data?.data || t.value.data || [];
+        setTransactions(Array.isArray(txData) ? txData : []);
+      }
+      if (b.status === "fulfilled") {
+        const budgetData = b.value.data?.budgets || b.value.data?.data || b.value.data || [];
+        setBudgets((Array.isArray(budgetData) ? budgetData : []).slice(0, 4));
+      }
       setLoading(false);
     });
   }, []);

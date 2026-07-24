@@ -30,6 +30,8 @@ import DynamicForm from "./pages/HR/DynamicForm";
 import Submissions from "./pages/HR/Submissions";
 import EmployeeForms from "./pages/Employee/EmployeeForms";
 import Settings from "./pages/Settings";
+import Attendance from "./pages/Attendance";
+import PublicFormFill from "./pages/Public/PublicFormFill";
 
 const ProtectedRoute = ({ children }) => {
   const { user } = useContext(AuthContext);
@@ -95,6 +97,7 @@ function AppContent() {
         <Route path="/landing" element={<LandingPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/f/:token" element={<PublicFormFill />} />
         <Route
           path="/"
           element={
@@ -114,8 +117,10 @@ function AppContent() {
           <Route path="users" element={<UserManagement />} />
           <Route path="forms" element={<FormsRouter />} />
           <Route path="forms/builder" element={<FormBuilder />} />
+          <Route path="forms/builder/:id" element={<FormBuilder />} />
           <Route path="forms/fill/:id" element={<DynamicForm />} />
           <Route path="submissions" element={<Submissions />} />
+          <Route path="attendance" element={<Attendance />} />
           <Route path="settings" element={<Settings />} />
         </Route>
       </Routes>

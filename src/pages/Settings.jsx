@@ -57,9 +57,9 @@ const Settings = () => {
   return (
     <div className="max-w-4xl mx-auto py-8 px-4 space-y-6">
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-700 to-indigo-800 rounded-2xl p-6 text-white shadow-lg">
+      <div className="bg-gradient-to-r from-slate-900 via-blue-950 to-indigo-950 rounded-2xl p-6 text-white shadow-lg">
         <h1 className="text-2xl font-bold">System Settings</h1>
-        <p className="text-blue-100 mt-1">Configure your personal preferences, security, and company visual settings</p>
+        <p className="text-blue-200 mt-1">Configure your personal preferences, security, and company visual settings</p>
       </div>
 
       <div className="flex flex-col md:flex-row gap-6">
@@ -261,7 +261,7 @@ const Settings = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-lg font-medium shadow transition-all flex items-center gap-2"
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg font-medium shadow transition-all flex items-center gap-2"
                 >
                   {loading ? <FaSpinner className="animate-spin w-4 h-4" /> : <FaCheckCircle className="w-4 h-4" />}
                   Change Password
@@ -275,7 +275,7 @@ const Settings = () => {
             <div className="space-y-5">
               <h3 className="text-lg font-bold text-gray-800 border-b border-gray-100 pb-2 mb-4">Visual Styling</h3>
               <div>
-                <span className="block text-sm font-medium text-gray-600 mb-3">Workspace Accent Accent Color</span>
+                <span className="block text-sm font-medium text-gray-600 mb-3">Workspace Accent Color</span>
                 <div className="grid grid-cols-4 gap-3">
                   {['blue', 'indigo', 'purple', 'emerald'].map((color) => (
                     <button
@@ -288,10 +288,13 @@ const Settings = () => {
                         accentColor === color ? 'border-2 border-blue-600 bg-blue-50/50' : 'border-gray-200'
                       }`}
                     >
-                      <div className={`w-8 h-8 rounded-full shadow mb-2 bg-${
-                        color === 'blue' ? 'blue-600' :
-                        color === 'indigo' ? 'indigo-600' :
-                        color === 'purple' ? 'purple-600' : 'emerald-600'
+                      <div className={`w-8 h-8 rounded-full shadow mb-2 ${
+                        {
+                          blue: 'bg-blue-600',
+                          indigo: 'bg-indigo-600',
+                          purple: 'bg-purple-600',
+                          emerald: 'bg-emerald-600',
+                        }[color]
                       }`} />
                       <span className="text-xs font-semibold capitalize text-gray-700">{color}</span>
                     </button>
