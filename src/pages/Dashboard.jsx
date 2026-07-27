@@ -7,6 +7,7 @@ import {
   FaArrowUp, FaArrowDown, FaWallet, FaProjectDiagram,
   FaMoneyBillWave, FaChartPie, FaBell, FaArrowRight,
 } from "react-icons/fa";
+import { useSocketEvent } from "../hooks/useSocketEvent";
 
 const fmt = (n) =>
   new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(n || 0);
@@ -37,7 +38,7 @@ const Dashboard = () => {
   const [budgets, setBudgets] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const fetchDashboard = () => {
     Promise.allSettled([
       transactionService.getSummary(),
       transactionService.getTransactions({ limit: 5 }),
@@ -54,7 +55,20 @@ const Dashboard = () => {
       }
       setLoading(false);
     });
+  };
+
+  useEffect(() => {
+    fetchDashboard();
   }, []);
+
+  // Live updates — refresh the overview when anyone changes transactions/budgets.
+  useSocketEvent("transaction:created", fetchDashboard);
+  useSocketEvent("transaction:updated", fetchDashboard);
+  useSocketEvent("transaction:deleted", fetchDashboard);
+  useSocketEvent("transaction:cleared", fetchDashboard);
+  useSocketEvent("budget:created", fetchDashboard);
+  useSocketEvent("budget:updated", fetchDashboard);
+  useSocketEvent("budget:deleted", fetchDashboard);
 
   if (loading) {
     return (

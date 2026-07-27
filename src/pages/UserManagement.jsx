@@ -8,6 +8,7 @@ import {
 } from 'react-icons/fa';
 import userService from '../services/userService';
 import toast from 'react-hot-toast';
+import { useSocketEvent } from '../hooks/useSocketEvent';
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
@@ -57,6 +58,11 @@ const UserManagement = () => {
       setLoading(false);
     }
   };
+
+  // Live updates — another Admin/HR tab adding, editing, or deactivating a user.
+  useSocketEvent('user:created', fetchUsers);
+  useSocketEvent('user:updated', fetchUsers);
+  useSocketEvent('user:deleted', fetchUsers);
 
   const filteredUsers = users.filter(user => {
     const matchesSearch = user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||

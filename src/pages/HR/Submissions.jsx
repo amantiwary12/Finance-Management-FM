@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FaCheck, FaTimes, FaUser, FaClock, FaEye } from 'react-icons/fa';
 import formService from '../../services/formService';
 import toast from 'react-hot-toast';
+import { useSocketEvent } from '../../hooks/useSocketEvent';
 
 const Submissions = () => {
   const [submissions, setSubmissions] = useState([]);
@@ -25,6 +26,10 @@ const Submissions = () => {
       setLoading(false);
     }
   };
+
+  // Live updates — a new submission or a status change from another HR tab.
+  useSocketEvent('submission:created', fetchSubmissions);
+  useSocketEvent('submission:updated', fetchSubmissions);
 
   const handleApprove = async (submissionId) => {
     try {

@@ -3,6 +3,7 @@ import { FaBell, FaCheck, FaTrash, FaInfoCircle, FaExclamationTriangle } from 'r
 import notificationService from '../services/notifications';
 import toast from 'react-hot-toast';
 import { formatDate } from '../utils/formatters';
+import { useSocketEvent } from '../hooks/useSocketEvent';
 
 const Notifications = () => {
   const [notifications, setNotifications] = useState([]);
@@ -22,6 +23,11 @@ const Notifications = () => {
       setLoading(false);
     }
   };
+
+  // Live updates — a new notification for this user appears instantly.
+  useSocketEvent('notification:new', fetchNotifications);
+  useSocketEvent('notification:updated', fetchNotifications);
+  useSocketEvent('notification:deleted', fetchNotifications);
 
   const handleMarkAsRead = async (id) => {
     try {

@@ -5,6 +5,7 @@ import { FaPlus, FaFileAlt, FaEye, FaClipboardList, FaTrash, FaQrcode, FaDownloa
 import formService from '../../services/formService';
 import { useRole } from '../../context/RoleContext';
 import toast from 'react-hot-toast';
+import { useSocketEvent } from '../../hooks/useSocketEvent';
 
 const FormList = () => {
   const [forms, setForms] = useState([]);
@@ -84,6 +85,11 @@ const FormList = () => {
       setLoading(false);
     }
   };
+
+  // Live updates — another HR tab creating, editing, or deleting a form.
+  useSocketEvent('form:created', fetchForms);
+  useSocketEvent('form:updated', fetchForms);
+  useSocketEvent('form:deleted', fetchForms);
 
   const handleDeleteForm = async (formId) => {
     if (!window.confirm("Are you sure you want to delete this form?")) {

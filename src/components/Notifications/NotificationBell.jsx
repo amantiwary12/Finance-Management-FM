@@ -2,15 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FaBell } from 'react-icons/fa';
 import notificationService from '../../services/notifications';
+import { useSocketEvent } from '../../hooks/useSocketEvent';
 
 const NotificationBell = () => {
   const [unreadCount, setUnreadCount] = useState(0);
-
-  useEffect(() => {
-    fetchUnreadCount();
-    const interval = setInterval(fetchUnreadCount, 30000);
-    return () => clearInterval(interval);
-  }, []);
 
   const fetchUnreadCount = async () => {
     try {
@@ -21,6 +16,16 @@ const NotificationBell = () => {
       console.error('Failed to fetch notifications count');
     }
   };
+
+  useEffect(() => {
+    fetchUnreadCount();
+  }, []);
+
+  // Live updates replace the old 30s poll — a new/read/deleted notification
+  // updates the badge instantly instead of waiting for the next interval tick.
+  useSocketEvent('notification:new', fetchUnreadCount);
+  useSocketEvent('notification:updated', fetchUnreadCount);
+  useSocketEvent('notification:deleted', fetchUnreadCount);
 
   return (
     <Link to="/notifications" className="relative">

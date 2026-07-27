@@ -1,11 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { FaPlus, FaTrash, FaUpload, FaEye } from 'react-icons/fa';
 import projectService from '../services/projects';
 import ImportModal from '../components/Projects/ImportProjectData';
 import toast from 'react-hot-toast';
 import { formatCurrency } from '../utils/formatters';
+import { useRole } from '../context/RoleContext';
+import { useSocketEvent } from '../hooks/useSocketEvent';
 
 const Projects = () => {
+  const navigate = useNavigate();
+  const { isHR } = useRole();
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -78,6 +83,11 @@ const Projects = () => {
     }
   };
 
+  // Live updates — someone else creating/updating/deleting a project shows up here too.
+  useSocketEvent('project:created', fetchProjects);
+  useSocketEvent('project:updated', fetchProjects);
+  useSocketEvent('project:deleted', fetchProjects);
+
   const handleImportSuccess = () => {
     toast.success('Transactions imported successfully!');
     // Refresh projects or show updated data
@@ -114,13 +124,15 @@ const Projects = () => {
           <h1 className="text-2xl font-bold text-gray-800">Projects</h1>
           <p className="text-gray-600 mt-1">Manage and track your projects</p>
         </div>
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2"
-        >
-          <FaPlus className="w-4 h-4" />
-          New Project
-        </button>
+        {!isHR && (
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2"
+          >
+            <FaPlus className="w-4 h-4" />
+            New Project
+          </button>
+        )}
       </div>
 
       {/* Status Filters */}
@@ -145,7 +157,11 @@ const Projects = () => {
       {/* Projects Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredProjects.map((project) => (
-          <div key={project._id} className="bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow p-6">
+          <div
+            key={project._id}
+            onClick={() => navigate(`/projects/${project._id}`)}
+            className="bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-md hover:border-blue-200 transition-shadow p-6 cursor-pointer"
+          >
             <div className="flex justify-between items-start mb-4">
               <div className="flex-1">
                 <div className="flex items-center gap-2">
@@ -158,6 +174,7 @@ const Projects = () => {
               </div>
               <select
                 value={project.status}
+                onClick={(e) => e.stopPropagation()}
                 onChange={(e) => handleUpdateStatus(project._id, e.target.value)}
                 className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(project.status)} border-0 focus:ring-2 focus:ring-blue-500`}
               >
@@ -183,14 +200,21 @@ const Projects = () => {
 
             <div className="flex justify-between gap-2 pt-4 border-t">
               <button
-                onClick={() => openImportModal(project)}
-                className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg flex items-center justify-center gap-2 transition-colors text-sm"
+                onClick={(e) => { e.stopPropagation(); navigate(`/projects/${project._id}`); }}
+                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg flex items-center justify-center gap-2 transition-colors text-sm"
               >
-                <FaUpload className="w-3 h-3" />
-                Import Data
+                <FaEye className="w-3 h-3" />
+                View Transactions
               </button>
               <button
-                onClick={() => handleDeleteProject(project._id)}
+                onClick={(e) => { e.stopPropagation(); openImportModal(project); }}
+                className="bg-green-600 hover:bg-green-700 text-white p-2 rounded-lg transition-colors"
+                title="Import data"
+              >
+                <FaUpload className="w-3 h-3" />
+              </button>
+              <button
+                onClick={(e) => { e.stopPropagation(); handleDeleteProject(project._id); }}
                 className="text-red-600 hover:bg-red-50 p-2 rounded-lg transition-colors"
                 title="Delete project"
               >

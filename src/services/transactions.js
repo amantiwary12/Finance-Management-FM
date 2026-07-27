@@ -29,6 +29,15 @@ const transactionService = {
     return api.post("/transactions", backendData);
   },
 
+  // OCR-scan a receipt/screenshot image to guess the amount (no DB write)
+  scanReceipt: (file) => {
+    const data = new FormData();
+    data.append("screenshot", file);
+    return api.post("/transactions/scan-receipt", data, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+  },
+
   // Update transaction
   updateTransaction: (id, data) => {
     if (data instanceof FormData) {

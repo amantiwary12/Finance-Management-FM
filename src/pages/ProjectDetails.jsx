@@ -5,8 +5,8 @@ import {
   FaExclamationTriangle, FaCheckCircle, FaSpinner, 
   FaDownload, FaUpload, FaChartPie
 } from 'react-icons/fa';
-import { 
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, 
+import {
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
   ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line
 } from 'recharts';
 import projectService from '../services/projects';
@@ -14,6 +14,7 @@ import transactionService from '../services/transactions';
 import ImportProjectData from '../components/Projects/ImportProjectData';
 import { formatCurrency, formatDate } from '../utils/formatters';
 import toast from 'react-hot-toast';
+import { useSocketEvent } from '../hooks/useSocketEvent';
 
 const ProjectDetails = () => {
   const { id } = useParams();
@@ -68,6 +69,13 @@ const ProjectDetails = () => {
       setLoading(false);
     }
   };
+
+  // Live updates — a transaction/project change from any user refreshes this view.
+  useSocketEvent('transaction:created', fetchProjectDetails);
+  useSocketEvent('transaction:updated', fetchProjectDetails);
+  useSocketEvent('transaction:deleted', fetchProjectDetails);
+  useSocketEvent('transaction:cleared', fetchProjectDetails);
+  useSocketEvent('project:updated', fetchProjectDetails);
 
   const processWeeklyData = (transactions) => {
     const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];

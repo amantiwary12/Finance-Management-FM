@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { formatCurrency } from '../utils/formatters';
 import budgetService from '../services/budget';
+import { useSocketEvent } from '../hooks/useSocketEvent';
 
 const Budget = () => {
   const [budgets, setBudgets] = useState([]);
@@ -63,6 +64,15 @@ const Budget = () => {
   useEffect(() => {
     fetchBudgets();
   }, []);
+
+  // Live updates — refresh when anyone changes a budget (also on transactions,
+  // since spent-vs-budget percentages depend on them).
+  useSocketEvent('budget:created', fetchBudgets);
+  useSocketEvent('budget:updated', fetchBudgets);
+  useSocketEvent('budget:deleted', fetchBudgets);
+  useSocketEvent('transaction:created', fetchBudgets);
+  useSocketEvent('transaction:updated', fetchBudgets);
+  useSocketEvent('transaction:deleted', fetchBudgets);
 
   // Create new budget
   const handleSubmit = async (e) => {

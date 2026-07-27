@@ -108,19 +108,22 @@ const Login = () => {
               <label htmlFor="mobileNumber" className="block text-sm font-semibold text-gray-700 mb-1.5">
                 Mobile Number
               </label>
-              <div className="relative">
-                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400">
-                  <FaPhone className="w-4 h-4" />
+              <div className="relative flex">
+                <span className="flex items-center gap-1.5 pl-3.5 pr-2.5 border border-r-0 border-gray-200 rounded-l-xl bg-gray-100 text-gray-500 text-sm font-medium select-none">
+                  <FaPhone className="w-4 h-4 text-gray-400" />
+                  +91
                 </span>
                 <input
                   id="mobileNumber"
                   name="mobileNumber"
                   type="tel"
                   value={mobileNumber}
-                  onChange={(e) => setMobileNumber(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm bg-gray-50 focus:bg-white"
+                  onChange={(e) => setMobileNumber(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                  className="w-full pl-3 pr-4 py-3 border border-gray-200 rounded-r-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm bg-gray-50 focus:bg-white"
                   placeholder="9876543210"
                   autoComplete="username"
+                  inputMode="numeric"
+                  maxLength={10}
                   required
                   disabled={isLoading}
                 />

@@ -9,6 +9,7 @@ import {
 import { Toaster } from "react-hot-toast";
 import { AuthProvider, AuthContext } from "./context/AuthContext";
 import { RoleProvider, useRole } from "./context/RoleContext";
+import { SocketProvider } from "./context/SocketContext";
 import { useNetworkStatus } from "./hooks/useNetworkStatus";
 import NetworkStatus from "./components/NetworkStatus";
 import Layout from "./components/Layout/Layout";
@@ -132,9 +133,11 @@ function App() {
   return (
     <Router>
       <AuthProvider>
-        <RoleProvider>
-          <AppContent />
-        </RoleProvider>
+        <SocketProvider>
+          <RoleProvider>
+            <AppContent />
+          </RoleProvider>
+        </SocketProvider>
       </AuthProvider>
     </Router>
   );

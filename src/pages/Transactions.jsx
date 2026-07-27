@@ -7,6 +7,7 @@ import transactionService from '../services/transactions';
 import projectService from '../services/projects';
 import budgetService from '../services/budget';
 import toast from 'react-hot-toast';
+import { useSocketEvent } from '../hooks/useSocketEvent';
 
 const Transactions = () => {
   const [transactions, setTransactions] = useState([]);
@@ -100,6 +101,16 @@ const Transactions = () => {
       console.error('Failed to fetch projects:', error);
     }
   };
+
+  // Live updates — refresh when anyone (any tab/user) changes this company's data.
+  useSocketEvent('transaction:created', fetchTransactions);
+  useSocketEvent('transaction:updated', fetchTransactions);
+  useSocketEvent('transaction:deleted', fetchTransactions);
+  useSocketEvent('transaction:cleared', fetchTransactions);
+  useSocketEvent('project:created', fetchProjects);
+  useSocketEvent('project:updated', fetchProjects);
+  useSocketEvent('project:deleted', fetchProjects);
+  useSocketEvent('budget:created', fetchBudgetCategories);
 
   const handleCreateTransaction = async (transactionData) => {
     try {

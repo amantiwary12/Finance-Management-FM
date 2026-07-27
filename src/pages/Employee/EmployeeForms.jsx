@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { FaFileAlt, FaSpinner, FaPaperPlane, FaCheckCircle, FaTimesCircle, FaClock } from 'react-icons/fa';
 import formService from '../../services/formService';
 import toast from 'react-hot-toast';
+import { useSocketEvent } from '../../hooks/useSocketEvent';
 
 const EmployeeForms = () => {
   const [forms, setForms] = useState([]);
@@ -34,6 +35,12 @@ const EmployeeForms = () => {
       setLoading(false);
     }
   };
+
+  // Live updates — HR publishing a new form, or a status change on your submission.
+  useSocketEvent('form:created', fetchData);
+  useSocketEvent('form:updated', fetchData);
+  useSocketEvent('form:deleted', fetchData);
+  useSocketEvent('submission:updated', fetchData);
 
   const openFormModal = (form) => {
     setSelectedForm(form);

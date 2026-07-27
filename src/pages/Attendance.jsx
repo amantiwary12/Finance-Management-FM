@@ -8,6 +8,7 @@ import toast from 'react-hot-toast';
 import { useRole } from '../context/RoleContext';
 import attendanceService from '../services/attendanceService';
 import AttendanceCalendar from '../components/Attendance/AttendanceCalendar';
+import { useSocketEvent } from '../hooks/useSocketEvent';
 
 const MONTH_NAMES = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -79,7 +80,7 @@ const MyAttendance = () => {
   const [records, setRecords] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const fetchMyAttendance = useCallback(() => {
     let cancelled = false;
     setLoading(true);
     attendanceService
@@ -98,6 +99,13 @@ const MyAttendance = () => {
       cancelled = true;
     };
   }, [month, year]);
+
+  useEffect(() => fetchMyAttendance(), [fetchMyAttendance]);
+
+  // Live updates — HR marking/correcting attendance shows up without a refresh.
+  useSocketEvent('attendance:updated', fetchMyAttendance);
+  useSocketEvent('attendance:deleted', fetchMyAttendance);
+  useSocketEvent('attendance:bulkUpdated', fetchMyAttendance);
 
   const counts = countStatuses(records);
 
@@ -505,6 +513,11 @@ const EmployeeCalendarModal = ({ userId, name, month, year, onClose }) => {
     fetchRecords();
   }, [fetchRecords]);
 
+  // Live updates — another HR tab correcting this employee's attendance.
+  useSocketEvent('attendance:updated', fetchRecords);
+  useSocketEvent('attendance:deleted', fetchRecords);
+  useSocketEvent('attendance:bulkUpdated', fetchRecords);
+
   const existingRecordForDay = (day) =>
     records.find((r) => new Date(r.date).getUTCDate() === day);
 
@@ -566,6 +579,11 @@ const ManageAttendance = () => {
   useEffect(() => {
     fetchSummary();
   }, [fetchSummary]);
+
+  // Live updates — refresh HR's monthly summary as attendance changes come in.
+  useSocketEvent('attendance:updated', fetchSummary);
+  useSocketEvent('attendance:deleted', fetchSummary);
+  useSocketEvent('attendance:bulkUpdated', fetchSummary);
 
   return (
     <div className="space-y-5">

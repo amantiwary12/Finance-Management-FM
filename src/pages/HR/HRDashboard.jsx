@@ -6,6 +6,7 @@ import {
 } from 'react-icons/fa';
 import formService from '../../services/formService';
 import toast from 'react-hot-toast';
+import { useSocketEvent } from '../../hooks/useSocketEvent';
 
 const STATUS_STYLES = {
   pending:  "bg-amber-50 text-amber-700 ring-1 ring-amber-200",
@@ -62,6 +63,10 @@ const HRDashboard = () => {
       setLoading(false);
     }
   };
+
+  // Live updates — refresh when a form submission is created or reviewed.
+  useSocketEvent('submission:created', fetchDashboardData);
+  useSocketEvent('submission:updated', fetchDashboardData);
 
   const recent = submissions.slice(0, 5);
 

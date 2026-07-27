@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FaTimes, FaInfoCircle, FaImage, FaTrash } from 'react-icons/fa';
+import { FaTimes, FaInfoCircle, FaImage, FaTrash, FaMagic } from 'react-icons/fa';
 import toast from 'react-hot-toast';
+import transactionService from '../../services/transactions';
 
 const TransactionForm = ({ isOpen, onClose, onSubmit, projects, budgetCategories = [] }) => {
   const [formData, setFormData] = useState({
@@ -15,6 +16,8 @@ const TransactionForm = ({ isOpen, onClose, onSubmit, projects, budgetCategories
   const [selectedFile, setSelectedFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isScanning, setIsScanning] = useState(false);
+  const [detectedAmount, setDetectedAmount] = useState(null);
   const fileInputRef = useRef(null);
 
   // EXACT categories from your backend validation
@@ -44,25 +47,49 @@ const TransactionForm = ({ isOpen, onClose, onSubmit, projects, budgetCategories
         toast.error('Please upload a valid image (JPEG, PNG, WEBP)');
         return;
       }
-      
+
       // Validate file size (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
         toast.error('File size must be less than 5MB');
         return;
       }
-      
+
       setSelectedFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result);
       };
       reader.readAsDataURL(file);
+
+      scanForAmount(file);
+    }
+  };
+
+  const scanForAmount = async (file) => {
+    setIsScanning(true);
+    setDetectedAmount(null);
+    try {
+      const res = await transactionService.scanReceipt(file);
+      const amount = res.data?.amount;
+      if (amount) {
+        setDetectedAmount(amount);
+        setFormData((prev) => ({ ...prev, amount: String(amount) }));
+        toast.success(`Detected amount ₹${amount} — please verify`);
+      } else {
+        toast('Could not detect an amount from this image, please enter it manually', { icon: 'ℹ️' });
+      }
+    } catch (error) {
+      console.error('Receipt scan failed:', error);
+      // OCR is a convenience — silently fall back to manual entry
+    } finally {
+      setIsScanning(false);
     }
   };
 
   const removeImage = () => {
     setSelectedFile(null);
     setImagePreview(null);
+    setDetectedAmount(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -204,13 +231,18 @@ const TransactionForm = ({ isOpen, onClose, onSubmit, projects, budgetCategories
               type="number"
               name="amount"
               value={formData.amount}
-              onChange={handleChange}
+              onChange={(e) => { setDetectedAmount(null); handleChange(e); }}
               className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
               placeholder="Enter amount"
               required
               min="1"
               step="1"
             />
+            {detectedAmount !== null && Number(formData.amount) === detectedAmount && (
+              <p className="text-xs text-green-600 mt-1 flex items-center gap-1">
+                <FaMagic className="w-3 h-3" /> Auto-filled from receipt — please verify it's correct
+              </p>
+            )}
           </div>
 
           {/* Category */}
@@ -296,6 +328,14 @@ const TransactionForm = ({ isOpen, onClose, onSubmit, projects, budgetCategories
                     >
                       <FaTrash className="w-3 h-3" />
                     </button>
+                    {isScanning && (
+                      <div className="absolute inset-0 bg-black/50 rounded-lg flex items-center justify-center">
+                        <span className="text-white text-xs flex items-center gap-1.5">
+                          <span className="w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                          Scanning for amount…
+                        </span>
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <>
@@ -371,10 +411,10 @@ const TransactionForm = ({ isOpen, onClose, onSubmit, projects, budgetCategories
 
           <button
             type="submit"
-            disabled={isSubmitting}
+            disabled={isSubmitting || isScanning}
             className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all font-medium shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isSubmitting ? 'Creating...' : 'Add Transaction'}
+            {isSubmitting ? 'Creating...' : isScanning ? 'Scanning receipt…' : 'Add Transaction'}
           </button>
         </form>
       </div>

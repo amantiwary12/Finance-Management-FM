@@ -16,6 +16,7 @@ import projectService from '../../services/projects';
 import userService from '../../services/userService';
 import { formatCurrency } from '../../utils/formatters';
 import toast from 'react-hot-toast';
+import { useSocketEvent } from '../../hooks/useSocketEvent';
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState({
@@ -183,7 +184,20 @@ const AdminDashboard = () => {
     return () => { if (abortControllerRef.current) abortControllerRef.current.abort(); };
   }, [fetchAdminData]);
 
-  const handleRefresh = () => fetchAdminData(true);
+  const handleRefresh = useCallback(() => fetchAdminData(true), [fetchAdminData]);
+
+  // Live updates — quietly re-pull the dashboard (no full-page skeleton) when
+  // anyone changes transactions, projects, or users.
+  useSocketEvent('transaction:created', handleRefresh);
+  useSocketEvent('transaction:updated', handleRefresh);
+  useSocketEvent('transaction:deleted', handleRefresh);
+  useSocketEvent('transaction:cleared', handleRefresh);
+  useSocketEvent('project:created', handleRefresh);
+  useSocketEvent('project:updated', handleRefresh);
+  useSocketEvent('project:deleted', handleRefresh);
+  useSocketEvent('user:created', handleRefresh);
+  useSocketEvent('user:updated', handleRefresh);
+  useSocketEvent('user:deleted', handleRefresh);
 
   const statCards = useMemo(() => [
     { title: 'Total Users',     value: stats.totalUsers,                  icon: FaUsers,          color: 'text-blue-600',   bg: 'bg-blue-50',   link: '/users' },
