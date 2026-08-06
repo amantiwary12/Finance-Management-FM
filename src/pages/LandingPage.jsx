@@ -252,7 +252,7 @@ const LandingPage = () => {
       <nav className="sticky top-0 z-50 border-b border-brand-400/25 bg-[#f7f5f0]/85 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
           <Link to="/landing" className="flex items-center gap-2.5 group">
-            <div className="w-9 h-9 bg-brand-400 text-black rounded-lg flex items-center justify-center font-black text-lg shadow-[3px_3px_0_#d9770655] group-hover:rotate-6 transition-transform">
+            <div className="w-9 h-9 bg-brand-400 text-black flex items-center justify-center font-black text-lg shadow-[3px_3px_0_#d9770655] group-hover:rotate-6 transition-transform">
               ₹
             </div>
             <div className="leading-none">
@@ -274,7 +274,7 @@ const LandingPage = () => {
             </Link>
             <Link
               to="/login"
-              className="bg-brand-400 hover:bg-brand-300 text-black text-sm font-bold px-5 py-2.5 rounded-lg shadow-[3px_3px_0_#d9770644] hover:shadow-[1px_1px_0_#d9770644] hover:-translate-y-0.5 transition-all"
+              className="bg-brand-400 hover:bg-brand-300 text-black text-sm font-bold px-5 py-2.5 shadow-[3px_3px_0_#d9770644] hover:shadow-[1px_1px_0_#d9770644] hover:-translate-y-0.5 transition-all"
             >
               Start Free
             </Link>
@@ -305,7 +305,7 @@ const LandingPage = () => {
           <div className="grid lg:grid-cols-2 gap-14 lg:gap-10 items-center">
             {/* copy */}
             <div>
-              <div className="ff-rise inline-flex items-center gap-2.5 border border-brand-500/40 bg-brand-500/10 px-4 py-1.5 rounded-full mb-8">
+              <div className="ff-rise inline-flex items-center gap-2.5 border border-brand-500/40 bg-brand-500/10 px-4 py-1.5 mb-8">
                 <span className="w-2 h-2 rounded-full bg-brand-500 ff-blink" />
                 <span className="font-mono text-[11px] uppercase tracking-[0.25em] text-brand-700">
                   Built for Indian businesses
@@ -333,13 +333,13 @@ const LandingPage = () => {
               <div className="ff-rise mt-9 flex flex-col sm:flex-row gap-4" style={{ animationDelay: '240ms' }}>
                 <Link
                   to="/login"
-                  className="inline-flex items-center justify-center gap-2.5 bg-brand-400 hover:bg-brand-300 text-black font-bold px-8 py-4 rounded-xl text-lg shadow-[5px_5px_0_#d9770644] hover:shadow-[2px_2px_0_#d9770644] hover:-translate-y-0.5 transition-all"
+                  className="inline-flex items-center justify-center gap-2.5 bg-brand-400 hover:bg-brand-300 text-black font-bold px-8 py-4 text-lg shadow-[5px_5px_0_#d9770644] hover:shadow-[2px_2px_0_#d9770644] hover:-translate-y-0.5 transition-all"
                 >
                   Start Free — 30 seconds <FaArrowRight className="w-4 h-4" />
                 </Link>
                 <a
                   href="#features"
-                  className="inline-flex items-center justify-center gap-2 border-2 border-slate-300 hover:border-brand-500 text-slate-800 font-semibold px-8 py-4 rounded-xl text-lg transition-all"
+                  className="inline-flex items-center justify-center gap-2 border-2 border-slate-300 hover:border-brand-500 text-slate-800 font-semibold px-8 py-4 text-lg transition-all"
                 >
                   See the Ledger <FaCoins className="w-4 h-4 text-brand-600" />
                 </a>
@@ -361,8 +361,8 @@ const LandingPage = () => {
             <div className="relative">
               <div className="ff-drift absolute -top-10 -right-6 w-24 h-24 rounded-full bg-brand-400/20 blur-2xl" />
               <div className="relative ff-rise" style={{ animationDelay: '200ms' }}>
-                <div className="absolute -inset-1 bg-gradient-to-br from-brand-400/60 via-transparent to-transparent rounded-3xl blur-lg opacity-70" />
-                <div className="relative bg-white border border-brand-400/30 rounded-3xl shadow-2xl shadow-amber-900/15 overflow-hidden">
+                <div className="absolute -inset-1 bg-gradient-to-br from-brand-400/60 via-transparent to-transparent blur-lg opacity-70" />
+                <div className="relative bg-white border border-brand-400/30 shadow-2xl shadow-amber-900/15 overflow-hidden">
                   {/* terminal header */}
                   <div className="flex items-center justify-between px-5 py-3 border-b border-slate-200 bg-slate-50">
                     <div className="flex items-center gap-2">
@@ -409,12 +409,12 @@ const LandingPage = () => {
                     {/* bar chart */}
                     <div className="flex items-end gap-2 h-24 mb-5">
                       {[42, 66, 38, 84, 55, 92, 48, 74, 60, 88, 70, 96].map((h, i) => (
-                        <div key={i} className="flex-1 rounded-t-sm bg-gradient-to-t from-brand-400 to-amber-500 ff-bar" style={{ height: `${h}%`, animationDelay: `${i * 90}ms` }} />
+                        <div key={i} className="flex-1 bg-gradient-to-t from-brand-400 to-amber-500 ff-bar" style={{ height: `${h}%`, animationDelay: `${i * 90}ms` }} />
                       ))}
                     </div>
 
                     {/* ledger rows */}
-                    <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                    <div className="border border-slate-200 bg-slate-50 p-3">
                       <div className="flex items-center justify-between px-1 pb-1 font-mono text-[9px] uppercase tracking-[0.3em] text-slate-400">
                         <span>Last entries</span><span>Status</span>
                       </div>
@@ -427,10 +427,10 @@ const LandingPage = () => {
                 </div>
 
                 {/* floating stickers */}
-                <div className="absolute -bottom-5 -left-4 sm:-left-8 bg-brand-400 text-black font-mono text-[10px] font-bold tracking-widest uppercase px-3 py-2 rounded-md shadow-lg rotate-[-6deg]">
+                <div className="absolute -bottom-5 -left-4 sm:-left-8 bg-brand-400 text-black font-mono text-[10px] font-bold tracking-widest uppercase px-3 py-2 shadow-lg rotate-[-6deg]">
                   Budget alert @ 86%
                 </div>
-                <div className="absolute -top-5 -right-2 sm:-right-6 bg-emerald-500 text-white font-mono text-[10px] font-bold tracking-widest uppercase px-3 py-2 rounded-md shadow-lg rotate-[6deg]">
+                <div className="absolute -top-5 -right-2 sm:-right-6 bg-emerald-500 text-white font-mono text-[10px] font-bold tracking-widest uppercase px-3 py-2 shadow-lg rotate-[6deg]">
                   Invoice #214 settled
                 </div>
               </div>
@@ -495,9 +495,9 @@ const LandingPage = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {features.map((f, i) => (
               <Reveal key={i} delay={(i % 3) * 90}>
-                <div className={`group relative h-full rounded-2xl border-2 border-slate-200 bg-white p-6 transition-all duration-300 hover:-translate-y-1.5 hover:border-amber-500/70 hover:shadow-[0_16px_48px_rgba(180,83,9,0.12)]`}>
+                <div className={`group relative h-full border-2 border-slate-200 bg-white p-6 transition-all duration-300 hover:-translate-y-1.5 hover:border-amber-500/70 hover:shadow-[0_16px_48px_rgba(180,83,9,0.12)]`}>
                   <div className="flex items-start justify-between mb-5">
-                    <div className={`w-12 h-12 rounded-xl border flex items-center justify-center ${f.accent}`}>
+                    <div className={`w-12 h-12 border flex items-center justify-center ${f.accent}`}>
                       <f.icon className="w-5 h-5" />
                     </div>
                     <span className="font-mono text-[11px] text-slate-400 group-hover:text-amber-600 transition-colors">
@@ -531,7 +531,7 @@ const LandingPage = () => {
             <div className="hidden md:block absolute top-10 left-[18%] right-[18%] h-0.5 bg-gradient-to-r from-amber-400/10 via-amber-500/50 to-amber-400/10" />
             {steps.map((step, i) => (
               <Reveal key={i} delay={i * 150} className="relative text-center">
-                <div className="relative z-10 mx-auto w-20 h-20 rounded-2xl bg-white border-2 border-amber-500/60 flex items-center justify-center shadow-[6px_6px_0_rgba(217,119,6,0.25)] mb-6 rotate-[-3deg] hover:rotate-0 transition-transform">
+                <div className="relative z-10 mx-auto w-20 h-20 bg-white border-2 border-amber-500/60 flex items-center justify-center shadow-[6px_6px_0_rgba(217,119,6,0.25)] mb-6 rotate-[-3deg] hover:rotate-0 transition-transform">
                   <span className="font-display text-2xl font-black text-amber-600">{step.number}</span>
                 </div>
                 <h3 className="font-display text-2xl font-bold text-slate-900 mb-3">{step.title}</h3>
@@ -562,11 +562,11 @@ const LandingPage = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {roles.map((role, i) => (
               <Reveal key={i} delay={(i % 3) * 90}>
-                <div className="group relative h-full rounded-2xl border-2 border-slate-200 bg-white p-6 overflow-hidden transition-all duration-300 hover:-translate-y-1.5 hover:border-slate-300 hover:shadow-lg">
+                <div className="group relative h-full border-2 border-slate-200 bg-white p-6 overflow-hidden transition-all duration-300 hover:-translate-y-1.5 hover:border-slate-300 hover:shadow-lg">
                   <div className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${role.bar} opacity-80 group-hover:opacity-100 transition-opacity`} />
                   <div className="flex items-start justify-between mb-6">
                     <h3 className="font-display text-2xl font-bold text-slate-900">{role.name}</h3>
-                    <span className={`text-[10px] font-semibold px-3 py-1 rounded-full whitespace-nowrap ${role.badge}`}>
+                    <span className={`text-[10px] font-semibold px-3 py-1 whitespace-nowrap ${role.badge}`}>
                       {role.tagline}
                     </span>
                   </div>
@@ -601,9 +601,9 @@ const LandingPage = () => {
           <div className="grid md:grid-cols-2 gap-5">
             {guide.map((section, i) => (
               <Reveal key={i} delay={(i % 2) * 100}>
-                <div className="h-full rounded-2xl border-2 border-slate-200 bg-white p-6 hover:border-amber-500/60 transition-colors">
+                <div className="h-full border-2 border-slate-200 bg-white p-6 hover:border-amber-500/60 transition-colors">
                   <h3 className="flex items-center gap-3 font-display text-lg font-bold text-slate-900 mb-5">
-                    <span className="font-mono text-xs text-black bg-brand-400 font-bold w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 shadow-[2px_2px_0_#d9770644]">
+                    <span className="font-mono text-xs text-black bg-brand-400 font-bold w-8 h-8 flex items-center justify-center flex-shrink-0 shadow-[2px_2px_0_#d9770644]">
                       {String(i + 1).padStart(2, '0')}
                     </span>
                     {section.title}
@@ -644,13 +644,13 @@ const LandingPage = () => {
             <div className="flex flex-col sm:flex-row gap-4 justify-center mt-10">
               <Link
                 to="/login"
-                className="inline-flex items-center justify-center gap-2.5 bg-slate-900 hover:bg-slate-800 text-white font-bold px-9 py-4 rounded-xl text-lg shadow-[5px_5px_0_rgba(0,0,0,0.25)] hover:shadow-[2px_2px_0_rgba(0,0,0,0.25)] hover:-translate-y-0.5 transition-all"
+                className="inline-flex items-center justify-center gap-2.5 bg-slate-900 hover:bg-slate-800 text-white font-bold px-9 py-4 text-lg shadow-[5px_5px_0_rgba(0,0,0,0.25)] hover:shadow-[2px_2px_0_rgba(0,0,0,0.25)] hover:-translate-y-0.5 transition-all"
               >
                 Get Started Now <FaArrowRight className="w-4 h-4" />
               </Link>
               <Link
                 to="/register"
-                className="inline-flex items-center justify-center gap-2.5 border-2 border-slate-900/70 hover:border-slate-900 text-slate-900 font-semibold px-9 py-4 rounded-xl text-lg transition-all"
+                className="inline-flex items-center justify-center gap-2.5 border-2 border-slate-900/70 hover:border-slate-900 text-slate-900 font-semibold px-9 py-4 text-lg transition-all"
               >
                 Create Account
               </Link>
@@ -669,7 +669,7 @@ const LandingPage = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-8 mb-12">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-brand-400 text-black rounded-lg flex items-center justify-center font-black text-xl">₹</div>
+              <div className="w-10 h-10 bg-brand-400 text-black flex items-center justify-center font-black text-xl">₹</div>
               <div className="leading-none">
                 <span className="block font-display text-xl font-bold text-slate-900">FinanceFlow</span>
                 <span className="block font-mono text-[9px] tracking-[0.35em] text-brand-600/90 uppercase">Company Ledger</span>
