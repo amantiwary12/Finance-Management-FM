@@ -52,6 +52,18 @@ const attendanceService = {
     const response = await api.put('/attendance/settings', data);
     return response;
   },
+
+  // POST /api/attendance/sync-sheet — HR/Admin fetches attendance from a Google Sheet link
+  syncFromSheet: async (sheetUrl, autoSync) => {
+    const response = await api.post('/attendance/sync-sheet', { sheetUrl, autoSync });
+    return response;
+  },
+
+  // PUT /api/attendance/sync-sheet — HR/Admin saves the linked sheet + auto-sync preference
+  updateSheetConfig: async (sheetUrl, autoSync) => {
+    const response = await api.put('/attendance/sync-sheet', { sheetUrl, autoSync });
+    return response;
+  },
 };
 
 export default attendanceService;

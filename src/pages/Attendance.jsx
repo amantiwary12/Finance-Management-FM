@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import {
   FaChevronLeft, FaChevronRight, FaCalendarCheck, FaUpload, FaCog,
   FaCheckCircle, FaTimesCircle, FaClock, FaFileExcel, FaDownload,
-  FaSpinner, FaEye, FaTimes, FaExclamationTriangle,
+  FaSpinner, FaEye, FaTimes, FaExclamationTriangle, FaLink, FaSync,
 } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 import { useRole } from '../context/RoleContext';
@@ -380,6 +380,189 @@ const SettingsCard = () => {
 
 const STATUS_OPTIONS = ['Present', 'Absent', 'Half Day', 'Late'];
 
+const SheetSyncCard = ({ onSynced }) => {
+  const [settings, setSettings] = useState(null);
+  const [sheetUrl, setSheetUrl] = useState('');
+  const [autoSync, setAutoSync] = useState(false);
+  const [syncing, setSyncing] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [result, setResult] = useState(null);
+
+  const loadSettings = useCallback(() => {
+    attendanceService
+      .getSettings()
+      .then((res) => {
+        const s = res.data.settings;
+        setSettings(s);
+        setSheetUrl(s.sheetUrl || '');
+        setAutoSync(!!s.autoSync);
+      })
+      .catch((error) => console.error('Failed to load attendance settings:', error));
+  }, []);
+
+  useEffect(() => {
+    loadSettings();
+  }, [loadSettings]);
+
+  const handleSync = async () => {
+    if (!sheetUrl.trim()) {
+      toast.error('Paste the Google Sheet link first');
+      return;
+    }
+    setSyncing(true);
+    setResult(null);
+    try {
+      const res = await attendanceService.syncFromSheet(sheetUrl.trim(), autoSync);
+      setResult(res.data);
+      toast.success(res.data.message || 'Attendance synced from Google Sheet');
+      onSynced?.();
+      loadSettings();
+    } catch (error) {
+      console.error('Sheet sync failed:', error);
+      toast.error(error.response?.data?.message || 'Failed to sync from Google Sheet');
+    } finally {
+      setSyncing(false);
+    }
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      const res = await attendanceService.updateSheetConfig(sheetUrl.trim(), autoSync);
+      setSettings(res.data.settings);
+      toast.success('Google Sheet link saved');
+    } catch (error) {
+      console.error('Failed to save sheet link:', error);
+      toast.error(error.response?.data?.message || 'Failed to save sheet link');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const downloadTemplate = () => {
+    const sample = [
+      ['Name', 'Mobile Number', 'Date', 'Status', 'Check In', 'Check Out'],
+      ['employe1', '1234567890', '2026-07-01', 'Present', '09:20', '18:30'],
+      ['employe1', '1234567890', '2026-07-02', '', '10:15', '18:30'],
+      ['employe1', '1234567890', '2026-07-03', 'Absent', '', ''],
+    ];
+    const csvContent = sample.map((row) => row.join(',')).join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'attendance_template.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const lastSync = settings?.lastSyncResult;
+
+  return (
+    <div className="bg-white rounded-2xl border border-gray-100 p-5">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <FaLink className="w-4 h-4 text-blue-600" />
+          <h3 className="text-sm font-bold text-gray-800">Sync Attendance from Google Sheet Link</h3>
+        </div>
+        <button
+          onClick={downloadTemplate}
+          className="text-xs text-blue-600 hover:text-blue-700 flex items-center gap-1 font-medium"
+        >
+          <FaDownload className="w-3 h-3" />
+          Sample Template
+        </button>
+      </div>
+      <p className="text-xs text-gray-500 mb-4">
+        HR pastes the Google Sheets link — the app fetches the data automatically and updates attendance.
+      </p>
+
+      <div className="flex flex-col sm:flex-row gap-3">
+        <input
+          type="text"
+          value={sheetUrl}
+          onChange={(e) => setSheetUrl(e.target.value)}
+          placeholder="https://docs.google.com/spreadsheets/d/..."
+          className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+        />
+        <button
+          onClick={handleSync}
+          disabled={syncing}
+          className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center gap-2 flex-shrink-0"
+        >
+          {syncing ? <FaSpinner className="animate-spin w-3.5 h-3.5" /> : <FaSync className="w-3.5 h-3.5" />}
+          {syncing ? 'Syncing...' : 'Sync Now'}
+        </button>
+        <button
+          onClick={handleSave}
+          disabled={saving}
+          className="px-4 py-2 border border-gray-300 text-gray-700 text-sm rounded-lg hover:bg-gray-50 disabled:opacity-50 flex items-center justify-center gap-2 flex-shrink-0"
+        >
+          {saving && <FaSpinner className="animate-spin w-3.5 h-3.5" />}
+          {saving ? 'Saving...' : 'Save Link'}
+        </button>
+      </div>
+
+      <div className="mt-3 flex items-center gap-2">
+        <input
+          type="checkbox"
+          id="attendance-auto-sync"
+          checked={autoSync}
+          onChange={(e) => setAutoSync(e.target.checked)}
+          className="w-4 h-4 accent-blue-600"
+        />
+        <label htmlFor="attendance-auto-sync" className="text-sm text-gray-700 cursor-pointer select-none">
+          Auto-refresh — keep pulling this sheet automatically (every 6 hours)
+        </label>
+      </div>
+
+      {settings?.lastSyncedAt && (
+        <p className="mt-3 text-xs text-gray-500">
+          Last synced: {new Date(settings.lastSyncedAt).toLocaleString()}
+        </p>
+      )}
+
+      {lastSync && !lastSync.ok && (
+        <div className="mt-3 p-3 bg-red-50 rounded-lg border border-red-100 text-xs text-red-600">
+          Last auto-sync failed: {lastSync.error}
+        </div>
+      )}
+
+      {lastSync && lastSync.ok && (
+        <div className="mt-3 p-3 bg-gray-50 rounded-lg text-xs text-gray-600">
+          Last result: {lastSync.inserted} added · {lastSync.updated} updated · {lastSync.skipped} skipped
+          {lastSync.skippedDetails?.length > 0 && ` · ${lastSync.skippedDetails.length} issues`}
+        </div>
+      )}
+
+      {result && (
+        <div className="mt-4 p-4 bg-blue-50 rounded-xl border border-blue-100">
+          <p className="text-sm font-semibold text-blue-900">
+            {result.inserted} added · {result.updated} updated · {result.skipped} skipped (of {result.totalRows} rows)
+          </p>
+          {result.skippedDetails?.length > 0 && (
+            <div className="mt-2 max-h-32 overflow-y-auto space-y-1">
+              {result.skippedDetails.map((s, i) => (
+                <p key={i} className="text-xs text-red-600">Row {s.row}: {s.reason}</p>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      <div className="mt-4 p-3 bg-gray-50 rounded-lg text-xs text-gray-600">
+        <p className="font-semibold text-gray-700 mb-1">How to use</p>
+        <p>1. Make a Google Sheet with the same columns as the template above.</p>
+        <p>2. In the sheet, click <span className="font-medium">Share → Anyone with the link → Viewer</span>.</p>
+        <p>3. Paste the share link here and press <span className="font-medium">Sync Now</span>.</p>
+        <p className="mt-1"><span className="font-medium">Columns:</span> Name or Mobile Number (to match employees), Date, and either Status or Check In / Check Out times.</p>
+      </div>
+    </div>
+  );
+};
+
 const pad2 = (n) => n.toString().padStart(2, '0');
 
 const DayEditor = ({ userId, year, month, day, existingRecord, onSaved, onCancel }) => {
@@ -587,6 +770,8 @@ const ManageAttendance = () => {
 
   return (
     <div className="space-y-5">
+      <SheetSyncCard onSynced={fetchSummary} />
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         <UploadCard onUploaded={fetchSummary} />
         <SettingsCard />
