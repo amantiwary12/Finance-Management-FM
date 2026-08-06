@@ -4,6 +4,20 @@ import userService from '../../services/userService';
 const TransactionFilters = ({ filters, onFilterChange, projects = [], userRole = 'Employee' }) => {
   const [users, setUsers] = useState([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
+  const [categoryDraft, setCategoryDraft] = useState(filters.category || '');
+
+  useEffect(() => {
+    setCategoryDraft(filters.category || '');
+  }, [filters.category]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (categoryDraft !== (filters.category || '')) {
+        onFilterChange({ category: categoryDraft });
+      }
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [categoryDraft]);
 
   useEffect(() => {
     if (userRole === 'Admin' || userRole === 'FinanceManager') {
@@ -49,8 +63,8 @@ const TransactionFilters = ({ filters, onFilterChange, projects = [], userRole =
           </label>
           <input
             type="text"
-            value={filters.category}
-            onChange={(e) => onFilterChange({ category: e.target.value })}
+            value={categoryDraft}
+            onChange={(e) => setCategoryDraft(e.target.value)}
             placeholder="Search by category"
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
           />
