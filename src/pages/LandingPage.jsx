@@ -131,59 +131,59 @@ const ticker = [
 ];
 
 const features = [
-  { icon: FaChartLine, title: 'Real-Time Analytics', desc: 'Daily, weekly, monthly and yearly charts for income and expense trends — with category-level breakdowns.', accent: 'text-amber-600 border-amber-500/50 bg-amber-500/10' },
-  { icon: FaWallet, title: 'Budget Management', desc: 'Category-wise budgets with alert thresholds. Track spending live with colour-coded progress bars.', accent: 'text-emerald-600 border-emerald-500/50 bg-emerald-500/10' },
-  { icon: FaProjectDiagram, title: 'Project Tracking', desc: 'Link every transaction to a project. Monitor budget usage, spend progress and status in real time.', accent: 'text-violet-600 border-violet-500/50 bg-violet-500/10' },
-  { icon: FaUsers, title: 'Team Management', desc: 'Invite team members, assign roles, and let each person see and edit only what their role permits.', accent: 'text-orange-600 border-orange-500/50 bg-orange-500/10' },
-  { icon: FaBell, title: 'Email + In-App Alerts', desc: 'Budget overages, project milestones and form submissions fire an in-app alert and a real email to the right people.', accent: 'text-rose-600 border-rose-500/50 bg-rose-500/10' },
-  { icon: FaFileExport, title: 'Excel Export & Import', desc: 'Export transactions to Excel for external reporting. Bulk-import data via CSV or Excel files.', accent: 'text-teal-600 border-teal-500/50 bg-teal-500/10' },
-  { icon: FaClipboardList, title: 'HR Form Builder', desc: 'HR builds and edits custom forms anytime. Every employee fills them and submissions live in one place.', accent: 'text-indigo-600 border-indigo-500/50 bg-indigo-500/10' },
-  { icon: FaQrcode, title: 'QR Code Form Sharing', desc: 'Turn any form into a QR code. Anyone who scans it fills and submits instantly — no login required.', accent: 'text-fuchsia-600 border-fuchsia-500/50 bg-fuchsia-500/10' },
-  { icon: FaCalendarCheck, title: 'Attendance Tracking', desc: 'HR uploads a spreadsheet and every employee gets a day-by-day calendar — present, absent, half-day or late.', accent: 'text-amber-600 border-amber-500/50 bg-amber-500/10' },
-  { icon: FaShieldAlt, title: 'Multi-Tenant & Secure', desc: 'Each company\u2019s data is completely isolated. JWT auth with role-based access control on every route.', accent: 'text-slate-700 border-slate-400/60 bg-slate-500/10' },
-  { icon: FaChartBar, title: 'Receipt Uploads', desc: 'Attach screenshot receipts to any transaction. Files are stored securely in the cloud via Cloudinary.', accent: 'text-pink-600 border-pink-500/50 bg-pink-500/10' },
+  { icon: FaChartLine, title: 'Real-Time Analytics', desc: 'Daily, weekly, monthly and yearly charts for income and expense trends — with category-level breakdowns.', accent: 'text-emerald-400 border-emerald-400/40 bg-emerald-400/10' },
+  { icon: FaWallet, title: 'Budget Management', desc: 'Category-wise budgets with alert thresholds. Track spending live with colour-coded progress bars.', accent: 'text-amber-400 border-amber-400/40 bg-amber-400/10' },
+  { icon: FaProjectDiagram, title: 'Project Tracking', desc: 'Link every transaction to a project. Monitor budget usage, spend progress and status in real time.', accent: 'text-violet-400 border-violet-400/40 bg-violet-400/10' },
+  { icon: FaUsers, title: 'Team Management', desc: 'Invite team members, assign roles, and let each person see and edit only what their role permits.', accent: 'text-orange-400 border-orange-400/40 bg-orange-400/10' },
+  { icon: FaBell, title: 'Email + In-App Alerts', desc: 'Budget overages, project milestones and form submissions fire an in-app alert and a real email to the right people.', accent: 'text-rose-400 border-rose-400/40 bg-rose-400/10' },
+  { icon: FaFileExport, title: 'Excel Export & Import', desc: 'Export transactions to Excel for external reporting. Bulk-import data via CSV or Excel files.', accent: 'text-teal-400 border-teal-400/40 bg-teal-400/10' },
+  { icon: FaClipboardList, title: 'HR Form Builder', desc: 'HR builds and edits custom forms anytime. Every employee fills them and submissions live in one place.', accent: 'text-indigo-400 border-indigo-400/40 bg-indigo-400/10' },
+  { icon: FaQrcode, title: 'QR Code Form Sharing', desc: 'Turn any form into a QR code. Anyone who scans it fills and submits instantly — no login required.', accent: 'text-fuchsia-400 border-fuchsia-400/40 bg-fuchsia-400/10' },
+  { icon: FaCalendarCheck, title: 'Attendance Tracking', desc: 'HR uploads a spreadsheet and every employee gets a day-by-day calendar — present, absent, half-day or late.', accent: 'text-amber-400 border-amber-400/40 bg-amber-400/10' },
+  { icon: FaShieldAlt, title: 'Multi-Tenant & Secure', desc: 'Each company\u2019s data is completely isolated. JWT auth with role-based access control on every route.', accent: 'text-slate-300 border-slate-300/40 bg-slate-300/10' },
+  { icon: FaChartBar, title: 'Receipt Uploads', desc: 'Attach screenshot receipts to any transaction. Files are stored securely in the cloud via Cloudinary.', accent: 'text-pink-400 border-pink-400/40 bg-pink-400/10' },
 ];
 
 const roles = [
   {
     name: 'Admin',
     tagline: 'Full company control',
-    badge: 'bg-red-500/10 text-red-700 border border-red-300',
+    badge: 'bg-red-500/15 text-red-300 border border-red-400/30',
     bar: 'from-red-500 to-rose-500',
     perms: ['Manage all team members', 'View all financial data', 'Create & delete projects', 'Set budgets and alerts', 'Export reports to Excel', 'Access admin dashboard'],
   },
   {
     name: 'Finance Manager',
     tagline: 'Financial oversight',
-    badge: 'bg-sky-500/10 text-sky-700 border border-sky-300',
+    badge: 'bg-sky-500/15 text-sky-300 border border-sky-400/30',
     bar: 'from-sky-500 to-cyan-500',
     perms: ['Create & edit transactions', 'Set category budgets', 'Generate financial reports', 'Export data to Excel', 'View all transactions', 'Monitor budget alerts'],
   },
   {
     name: 'Manager',
     tagline: 'Project & team oversight',
-    badge: 'bg-violet-500/10 text-violet-700 border border-violet-300',
+    badge: 'bg-violet-500/15 text-violet-300 border border-violet-400/30',
     bar: 'from-violet-500 to-purple-500',
     perms: ['Create & manage projects', 'View all transactions', 'Monitor project budgets', 'Update project status', 'Weekly & monthly reports', 'View team activity'],
   },
   {
     name: 'HR',
     tagline: 'People & forms',
-    badge: 'bg-amber-500/10 text-amber-700 border border-amber-300',
+    badge: 'bg-amber-500/15 text-amber-300 border border-amber-400/30',
     bar: 'from-amber-500 to-yellow-500',
     perms: ['Build & edit custom forms', 'Share forms via QR code', 'Review form submissions', 'Upload attendance sheets', 'Access HR dashboard', 'Read-only financial view'],
   },
   {
     name: 'Employee',
     tagline: 'Personal finance view',
-    badge: 'bg-emerald-500/10 text-emerald-700 border border-emerald-300',
+    badge: 'bg-emerald-500/15 text-emerald-300 border border-emerald-400/30',
     bar: 'from-emerald-500 to-green-500',
     perms: ['Log personal transactions', 'View own transactions only', 'Fill out company forms', 'View monthly attendance calendar', 'View project list', 'Personal dashboard'],
   },
   {
     name: 'Viewer',
     tagline: 'Read-only access',
-    badge: 'bg-slate-500/10 text-slate-700 border border-slate-300',
+    badge: 'bg-slate-500/15 text-slate-300 border border-slate-400/30',
     bar: 'from-slate-400 to-slate-500',
     perms: ['View transactions', 'Browse projects', 'See budget overview', 'Access reports', 'View notifications', 'No edit permissions'],
   },
@@ -208,9 +208,9 @@ const guide = [
    Little building blocks
 ───────────────────────────────────────────────────────────── */
 const LedgerRow = ({ label, amount, sign, delay }) => (
-  <div className="flex items-center justify-between gap-3 py-1.5 border-b border-slate-200 text-xs" style={{ animationDelay: `${delay}ms` }}>
-    <span className="text-slate-500 truncate">{label}</span>
-    <span className={`font-mono font-semibold flex-shrink-0 ${sign === '+' ? 'text-emerald-600' : 'text-rose-600'}`}>
+  <div className="flex items-center justify-between gap-3 py-1.5 border-b border-white/5 text-xs" style={{ animationDelay: `${delay}ms` }}>
+    <span className="text-slate-400 truncate">{label}</span>
+    <span className={`font-mono font-semibold flex-shrink-0 ${sign === '+' ? 'text-emerald-400' : 'text-rose-400'}`}>
       {sign}₹{amount}
     </span>
   </div>
@@ -229,11 +229,11 @@ const Stamp = ({ children, className = '' }) => (
 ───────────────────────────────────────────────────────────── */
 const LandingPage = () => {
   return (
-    <div className="min-h-screen bg-[#f7f5f0] text-slate-800 overflow-x-hidden">
+    <div className="min-h-screen bg-[#070b09] text-slate-300 overflow-x-hidden">
       <style>{styles}</style>
 
       {/* ── Ticker tape (top) ─────────────────────────────── */}
-      <div className="bg-brand-400 text-black overflow-hidden border-b-2 border-black">
+      <div className="bg-emerald-400 text-black overflow-hidden border-b-2 border-black">
         <div className="ff-marquee flex whitespace-nowrap w-max">
           {[0, 1].map((dup) => (
             <div key={dup} className="flex items-center">
@@ -249,32 +249,32 @@ const LandingPage = () => {
       </div>
 
       {/* ── Navbar ────────────────────────────────────────── */}
-      <nav className="sticky top-0 z-50 border-b border-brand-400/25 bg-[#f7f5f0]/85 backdrop-blur-md">
+      <nav className="sticky top-0 z-50 border-b border-emerald-400/20 bg-[#070b09]/85 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
           <Link to="/landing" className="flex items-center gap-2.5 group">
-            <div className="w-9 h-9 bg-brand-400 text-black flex items-center justify-center font-black text-lg shadow-[3px_3px_0_#d9770655] group-hover:rotate-6 transition-transform">
+            <div className="w-9 h-9 bg-emerald-400 text-black rounded-lg flex items-center justify-center font-black text-lg shadow-[3px_3px_0_#34d39955] group-hover:rotate-6 transition-transform">
               ₹
             </div>
             <div className="leading-none">
-              <span className="block font-display text-xl font-bold text-slate-900 tracking-tight">FinanceFlow</span>
-              <span className="block font-mono text-[9px] tracking-[0.35em] text-brand-600/90 uppercase">Company Ledger</span>
+              <span className="block font-display text-xl font-bold text-white tracking-tight">FinanceFlow</span>
+              <span className="block font-mono text-[9px] tracking-[0.35em] text-emerald-300/90 uppercase">Company Ledger</span>
             </div>
           </Link>
 
-          <div className="hidden md:flex items-center gap-8 text-sm text-slate-600">
-            <a href="#features" className="hover:text-brand-700 transition-colors">Modules</a>
-            <a href="#how" className="hover:text-brand-700 transition-colors">How it works</a>
-            <a href="#roles" className="hover:text-brand-700 transition-colors">Roles</a>
-            <a href="#guide" className="hover:text-brand-700 transition-colors">Guide</a>
+          <div className="hidden md:flex items-center gap-8 text-sm text-slate-400">
+            <a href="#features" className="hover:text-emerald-300 transition-colors">Modules</a>
+            <a href="#how" className="hover:text-emerald-300 transition-colors">How it works</a>
+            <a href="#roles" className="hover:text-emerald-300 transition-colors">Roles</a>
+            <a href="#guide" className="hover:text-emerald-300 transition-colors">Guide</a>
           </div>
 
           <div className="flex items-center gap-3">
-            <Link to="/login" className="text-slate-700 hover:text-brand-700 text-sm font-medium transition-colors">
+            <Link to="/login" className="text-slate-300 hover:text-emerald-300 text-sm font-medium transition-colors">
               Sign In
             </Link>
             <Link
               to="/login"
-              className="bg-brand-400 hover:bg-brand-300 text-black text-sm font-bold px-5 py-2.5 shadow-[3px_3px_0_#d9770644] hover:shadow-[1px_1px_0_#d9770644] hover:-translate-y-0.5 transition-all"
+              className="bg-emerald-400 hover:bg-emerald-300 text-black text-sm font-bold px-5 py-2.5 rounded-lg shadow-[3px_3px_0_#34d39944] hover:shadow-[1px_1px_0_#34d39944] hover:-translate-y-0.5 transition-all"
             >
               Start Free
             </Link>
@@ -283,20 +283,20 @@ const LandingPage = () => {
       </nav>
 
       {/* ── Hero ──────────────────────────────────────────── */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-[#fffaf0] to-[#f7f5f0]">
+      <section className="relative overflow-hidden bg-gradient-to-b from-[#081009] to-[#070b09]">
         {/* background */}
         <div className="absolute inset-0 pointer-events-none">
           <div
             className="absolute inset-0 opacity-[0.5]"
             style={{
               backgroundImage:
-                'linear-gradient(rgba(217,119,6,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(217,119,6,0.06) 1px, transparent 1px)',
+                'linear-gradient(rgba(16,185,129,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(16,185,129,0.05) 1px, transparent 1px)',
               backgroundSize: '46px 46px',
             }}
           />
-          <div className="absolute -top-32 -right-24 w-[500px] h-[500px] rounded-full blur-3xl bg-brand-300/30" />
-          <div className="absolute bottom-0 -left-32 w-[480px] h-[480px] rounded-full blur-3xl bg-amber-200/40" />
-          <div className="absolute top-1/3 left-1/2 -translate-x-1/2 text-brand-400/[0.08] font-black text-[28rem] leading-none select-none hidden lg:block ff-spin">
+          <div className="absolute -top-32 -right-24 w-[500px] h-[500px] rounded-full blur-3xl bg-emerald-500/15" />
+          <div className="absolute bottom-0 -left-32 w-[480px] h-[480px] rounded-full blur-3xl bg-brand-500/10" />
+          <div className="absolute top-1/3 left-1/2 -translate-x-1/2 text-emerald-400/[0.05] font-black text-[28rem] leading-none select-none hidden lg:block ff-spin">
             ₹
           </div>
         </div>
@@ -305,27 +305,27 @@ const LandingPage = () => {
           <div className="grid lg:grid-cols-2 gap-14 lg:gap-10 items-center">
             {/* copy */}
             <div>
-              <div className="ff-rise inline-flex items-center gap-2.5 border border-brand-500/40 bg-brand-500/10 px-4 py-1.5 mb-8">
-                <span className="w-2 h-2 rounded-full bg-brand-500 ff-blink" />
-                <span className="font-mono text-[11px] uppercase tracking-[0.25em] text-brand-700">
+              <div className="ff-rise inline-flex items-center gap-2.5 border border-emerald-400/40 bg-emerald-400/10 px-4 py-1.5 mb-8">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 ff-blink" />
+                <span className="font-mono text-[11px] uppercase tracking-[0.25em] text-emerald-300">
                   Built for Indian businesses
                 </span>
               </div>
 
               <h1 className="ff-rise font-display font-bold leading-[0.95] tracking-tight" style={{ animationDelay: '80ms' }}>
-                <span className="block text-5xl sm:text-6xl xl:text-7xl text-slate-900">MASTER</span>
-                <span className="block text-5xl sm:text-6xl xl:text-7xl mt-1 bg-gradient-to-r from-amber-600 via-brand-500 to-amber-600 bg-clip-text text-transparent">
+                <span className="block text-5xl sm:text-6xl xl:text-7xl text-white">MASTER</span>
+                <span className="block text-5xl sm:text-6xl xl:text-7xl mt-1 bg-gradient-to-r from-emerald-300 via-emerald-400 to-teal-400 bg-clip-text text-transparent">
                   YOUR MONEY
                 </span>
                 <span
                   className="block text-5xl sm:text-6xl xl:text-7xl mt-1 text-transparent"
-                  style={{ WebkitTextStroke: '1.5px #1e293b' }}
+                  style={{ WebkitTextStroke: '1.5px #fcd34d' }}
                 >
                   LIKE A PRO
                 </span>
               </h1>
 
-              <p className="ff-rise mt-8 text-slate-600 text-lg max-w-lg leading-relaxed" style={{ animationDelay: '160ms' }}>
+              <p className="ff-rise mt-8 text-slate-400 text-lg max-w-lg leading-relaxed" style={{ animationDelay: '160ms' }}>
                 Ledger, budgets, projects, HR forms and attendance — live in one secure app.
                 Made for companies that run on WhatsApp, Excel and gut feel.
               </p>
@@ -333,15 +333,15 @@ const LandingPage = () => {
               <div className="ff-rise mt-9 flex flex-col sm:flex-row gap-4" style={{ animationDelay: '240ms' }}>
                 <Link
                   to="/login"
-                  className="inline-flex items-center justify-center gap-2.5 bg-brand-400 hover:bg-brand-300 text-black font-bold px-8 py-4 text-lg shadow-[5px_5px_0_#d9770644] hover:shadow-[2px_2px_0_#d9770644] hover:-translate-y-0.5 transition-all"
+                  className="inline-flex items-center justify-center gap-2.5 bg-emerald-400 hover:bg-emerald-300 text-black font-bold px-8 py-4 text-lg shadow-[5px_5px_0_#34d39944] hover:shadow-[2px_2px_0_#34d39944] hover:-translate-y-0.5 transition-all"
                 >
                   Start Free — 30 seconds <FaArrowRight className="w-4 h-4" />
                 </Link>
                 <a
                   href="#features"
-                  className="inline-flex items-center justify-center gap-2 border-2 border-slate-300 hover:border-brand-500 text-slate-800 font-semibold px-8 py-4 text-lg transition-all"
+                  className="inline-flex items-center justify-center gap-2 border-2 border-slate-600 hover:border-emerald-400 text-slate-200 font-semibold px-8 py-4 text-lg transition-all"
                 >
-                  See the Ledger <FaCoins className="w-4 h-4 text-brand-600" />
+                  See the Ledger <FaCoins className="w-4 h-4 text-brand-400" />
                 </a>
               </div>
 
@@ -359,20 +359,20 @@ const LandingPage = () => {
 
             {/* terminal mockup */}
             <div className="relative">
-              <div className="ff-drift absolute -top-10 -right-6 w-24 h-24 rounded-full bg-brand-400/20 blur-2xl" />
+              <div className="ff-drift absolute -top-10 -right-6 w-24 h-24 rounded-full bg-emerald-400/15 blur-2xl" />
               <div className="relative ff-rise" style={{ animationDelay: '200ms' }}>
-                <div className="absolute -inset-1 bg-gradient-to-br from-brand-400/60 via-transparent to-transparent blur-lg opacity-70" />
-                <div className="relative bg-white border border-brand-400/30 shadow-2xl shadow-amber-900/15 overflow-hidden">
+                <div className="absolute -inset-1 bg-gradient-to-br from-emerald-400/50 via-transparent to-transparent blur-lg opacity-70" />
+                <div className="relative bg-[#0a0e0c] border border-emerald-400/30 shadow-2xl shadow-black/60 overflow-hidden">
                   {/* terminal header */}
-                  <div className="flex items-center justify-between px-5 py-3 border-b border-slate-200 bg-slate-50">
+                  <div className="flex items-center justify-between px-5 py-3 border-b border-white/10 bg-white/[0.03]">
                     <div className="flex items-center gap-2">
                       <span className="w-3 h-3 rounded-full bg-rose-400" />
                       <span className="w-3 h-3 rounded-full bg-amber-400" />
                       <span className="w-3 h-3 rounded-full bg-emerald-400" />
                     </div>
                     <span className="font-mono text-[10px] tracking-[0.25em] text-slate-500 uppercase">FinanceFlow // Live Ledger</span>
-                    <span className="font-mono text-[10px] text-emerald-600 flex items-center gap-1.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 ff-blink" /> LIVE
+                    <span className="font-mono text-[10px] text-emerald-400 flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 ff-blink" /> LIVE
                     </span>
                   </div>
 
@@ -381,13 +381,13 @@ const LandingPage = () => {
                     <div className="mb-5">
                       <div className="flex items-end justify-between mb-1">
                         <span className="text-xs text-slate-500 font-mono uppercase tracking-wider">Net balance</span>
-                        <span className="font-mono text-xl font-bold text-amber-600">₹8,42,110.50</span>
+                        <span className="font-mono text-xl font-bold text-emerald-300">₹8,42,110.50</span>
                       </div>
                       <svg viewBox="0 0 320 60" className="w-full h-16" preserveAspectRatio="none">
                         <path
                           d="M0,50 L30,44 L55,48 L80,38 L105,42 L130,30 L155,34 L180,22 L205,28 L230,16 L255,20 L280,10 L305,14 L320,6"
                           fill="none"
-                          stroke="#f59e0b"
+                          stroke="#34d399"
                           strokeWidth="2.5"
                           className="ff-draw"
                           strokeLinecap="round"
@@ -399,8 +399,8 @@ const LandingPage = () => {
                         />
                         <defs>
                           <linearGradient id="ffArea" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor="#f59e0b" />
-                            <stop offset="100%" stopColor="#f59e0b" stopOpacity="0" />
+                            <stop offset="0%" stopColor="#34d399" />
+                            <stop offset="100%" stopColor="#34d399" stopOpacity="0" />
                           </linearGradient>
                         </defs>
                       </svg>
@@ -409,13 +409,13 @@ const LandingPage = () => {
                     {/* bar chart */}
                     <div className="flex items-end gap-2 h-24 mb-5">
                       {[42, 66, 38, 84, 55, 92, 48, 74, 60, 88, 70, 96].map((h, i) => (
-                        <div key={i} className="flex-1 bg-gradient-to-t from-brand-400 to-amber-500 ff-bar" style={{ height: `${h}%`, animationDelay: `${i * 90}ms` }} />
+                        <div key={i} className="flex-1 bg-gradient-to-t from-emerald-500 to-emerald-400 ff-bar" style={{ height: `${h}%`, animationDelay: `${i * 90}ms` }} />
                       ))}
                     </div>
 
                     {/* ledger rows */}
-                    <div className="border border-slate-200 bg-slate-50 p-3">
-                      <div className="flex items-center justify-between px-1 pb-1 font-mono text-[9px] uppercase tracking-[0.3em] text-slate-400">
+                    <div className="border border-white/10 bg-black/30 p-3">
+                      <div className="flex items-center justify-between px-1 pb-1 font-mono text-[9px] uppercase tracking-[0.3em] text-slate-500">
                         <span>Last entries</span><span>Status</span>
                       </div>
                       <LedgerRow label="Client payment — M/s Sharma & Co" amount="2,15,000" sign="+" delay={300} />
@@ -430,7 +430,7 @@ const LandingPage = () => {
                 <div className="absolute -bottom-5 -left-4 sm:-left-8 bg-brand-400 text-black font-mono text-[10px] font-bold tracking-widest uppercase px-3 py-2 shadow-lg rotate-[-6deg]">
                   Budget alert @ 86%
                 </div>
-                <div className="absolute -top-5 -right-2 sm:-right-6 bg-emerald-500 text-white font-mono text-[10px] font-bold tracking-widest uppercase px-3 py-2 shadow-lg rotate-[6deg]">
+                <div className="absolute -top-5 -right-2 sm:-right-6 bg-emerald-500 text-black font-mono text-[10px] font-bold tracking-widest uppercase px-3 py-2 shadow-lg rotate-[6deg]">
                   Invoice #214 settled
                 </div>
               </div>
@@ -456,7 +456,7 @@ const LandingPage = () => {
       </section>
 
       {/* ── Stats band ────────────────────────────────────── */}
-      <section className="py-16 md:py-20 border-b border-slate-200 bg-white">
+      <section className="py-16 md:py-20 border-b border-emerald-400/10 bg-[#0a0e0c]">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
             {[
@@ -466,10 +466,10 @@ const LandingPage = () => {
               { value: 100, suffix: '%', label: 'Data isolation', sub: 'per company, guaranteed' },
             ].map((s, i) => (
               <Reveal key={i} delay={i * 100} className="text-center">
-                <p className="font-display text-5xl md:text-6xl font-bold text-amber-600">
+                <p className="font-display text-5xl md:text-6xl font-bold text-emerald-400">
                   <CountUp value={s.value} suffix={s.suffix} />
                 </p>
-                <p className="mt-3 font-mono text-[11px] uppercase tracking-[0.3em] text-slate-700">{s.label}</p>
+                <p className="mt-3 font-mono text-[11px] uppercase tracking-[0.3em] text-slate-200">{s.label}</p>
                 <p className="mt-1 text-xs text-slate-500">{s.sub}</p>
               </Reveal>
             ))}
@@ -479,15 +479,15 @@ const LandingPage = () => {
 
       {/* ── Features ──────────────────────────────────────── */}
       <section id="features" className="relative py-24 md:py-28">
-        <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-transparent via-amber-400/[0.04] to-transparent" />
+        <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-transparent via-emerald-400/[0.03] to-transparent" />
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <Reveal className="text-center mb-16">
-            <Stamp className="text-amber-700 border-amber-600/50 mb-5">The toolkit</Stamp>
-            <h2 className="font-display text-4xl md:text-5xl font-bold text-slate-900 tracking-tight">
+            <Stamp className="text-brand-400 border-brand-400/60 mb-5">The toolkit</Stamp>
+            <h2 className="font-display text-4xl md:text-5xl font-bold text-white tracking-tight">
               EVERYTHING YOUR TEAM NEEDS.
-              <span className="block mt-2 text-amber-600">NOTHING THEY DON'T.</span>
+              <span className="block mt-2 text-emerald-400">NOTHING THEY DON'T.</span>
             </h2>
-            <p className="text-slate-600 text-lg max-w-xl mx-auto mt-5">
+            <p className="text-slate-400 text-lg max-w-xl mx-auto mt-5">
               A complete toolkit for tracking, analysing and managing company finances — no spreadsheets required.
             </p>
           </Reveal>
@@ -495,18 +495,18 @@ const LandingPage = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {features.map((f, i) => (
               <Reveal key={i} delay={(i % 3) * 90}>
-                <div className={`group relative h-full border-2 border-slate-200 bg-white p-6 transition-all duration-300 hover:-translate-y-1.5 hover:border-amber-500/70 hover:shadow-[0_16px_48px_rgba(180,83,9,0.12)]`}>
+                <div className="group relative h-full border-2 border-white/10 bg-[#0a0e0c] p-6 transition-all duration-300 hover:-translate-y-1.5 hover:border-emerald-400/60 hover:shadow-[0_16px_48px_rgba(0,0,0,0.5),0_0_32px_rgba(16,185,129,0.12)]">
                   <div className="flex items-start justify-between mb-5">
                     <div className={`w-12 h-12 border flex items-center justify-center ${f.accent}`}>
                       <f.icon className="w-5 h-5" />
                     </div>
-                    <span className="font-mono text-[11px] text-slate-400 group-hover:text-amber-600 transition-colors">
+                    <span className="font-mono text-[11px] text-slate-600 group-hover:text-emerald-400 transition-colors">
                       0{i + 1}
                     </span>
                   </div>
-                  <h3 className="font-display text-lg font-bold text-slate-900 mb-2">{f.title}</h3>
-                  <p className="text-sm text-slate-600 leading-relaxed">{f.desc}</p>
-                  <div className="absolute bottom-0 left-0 h-1 w-0 bg-amber-500 group-hover:w-full transition-all duration-500" />
+                  <h3 className="font-display text-lg font-bold text-white mb-2">{f.title}</h3>
+                  <p className="text-sm text-slate-400 leading-relaxed">{f.desc}</p>
+                  <div className="absolute bottom-0 left-0 h-1 w-0 bg-emerald-400 group-hover:w-full transition-all duration-500" />
                 </div>
               </Reveal>
             ))}
@@ -515,29 +515,29 @@ const LandingPage = () => {
       </section>
 
       {/* ── How it works ──────────────────────────────────── */}
-      <section id="how" className="py-24 md:py-28 bg-white border-y border-slate-200">
+      <section id="how" className="py-24 md:py-28 bg-[#0a0e0c] border-y border-emerald-400/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <Reveal className="text-center mb-20">
-            <Stamp className="text-amber-700 border-amber-600/50 mb-5">Zero friction</Stamp>
-            <h2 className="font-display text-4xl md:text-5xl font-bold text-slate-900 tracking-tight">
-              UP AND RUNNING IN <span className="text-amber-600">3 STEPS.</span>
+            <Stamp className="text-brand-400 border-brand-400/60 mb-5">Zero friction</Stamp>
+            <h2 className="font-display text-4xl md:text-5xl font-bold text-white tracking-tight">
+              UP AND RUNNING IN <span className="text-emerald-400">3 STEPS.</span>
             </h2>
-            <p className="text-slate-600 text-lg max-w-xl mx-auto mt-5">
+            <p className="text-slate-400 text-lg max-w-xl mx-auto mt-5">
               From sign-up to full financial visibility in minutes, not hours.
             </p>
           </Reveal>
 
           <div className="relative grid md:grid-cols-3 gap-12 md:gap-8">
-            <div className="hidden md:block absolute top-10 left-[18%] right-[18%] h-0.5 bg-gradient-to-r from-amber-400/10 via-amber-500/50 to-amber-400/10" />
+            <div className="hidden md:block absolute top-10 left-[18%] right-[18%] h-0.5 bg-gradient-to-r from-emerald-400/10 via-emerald-400/50 to-emerald-400/10" />
             {steps.map((step, i) => (
               <Reveal key={i} delay={i * 150} className="relative text-center">
-                <div className="relative z-10 mx-auto w-20 h-20 bg-white border-2 border-amber-500/60 flex items-center justify-center shadow-[6px_6px_0_rgba(217,119,6,0.25)] mb-6 rotate-[-3deg] hover:rotate-0 transition-transform">
-                  <span className="font-display text-2xl font-black text-amber-600">{step.number}</span>
+                <div className="relative z-10 mx-auto w-20 h-20 bg-[#070b09] border-2 border-emerald-400/60 flex items-center justify-center shadow-[6px_6px_0_rgba(16,185,129,0.25)] mb-6 rotate-[-3deg] hover:rotate-0 transition-transform">
+                  <span className="font-display text-2xl font-black text-emerald-400">{step.number}</span>
                 </div>
-                <h3 className="font-display text-2xl font-bold text-slate-900 mb-3">{step.title}</h3>
-                <p className="text-slate-600 text-sm leading-relaxed max-w-xs mx-auto">{step.desc}</p>
+                <h3 className="font-display text-2xl font-bold text-white mb-3">{step.title}</h3>
+                <p className="text-slate-400 text-sm leading-relaxed max-w-xs mx-auto">{step.desc}</p>
                 {i < steps.length - 1 && (
-                  <FaArrowRight className="hidden md:block absolute top-8 -right-7 text-amber-500/50 w-5 h-5" />
+                  <FaArrowRight className="hidden md:block absolute top-8 -right-7 text-emerald-400/50 w-5 h-5" />
                 )}
               </Reveal>
             ))}
@@ -547,14 +547,14 @@ const LandingPage = () => {
 
       {/* ── Roles ──────────────────────────────────────────── */}
       <section id="roles" className="relative py-24 md:py-28 overflow-hidden">
-        <div className="absolute -top-20 right-0 text-amber-600/[0.05] font-black text-[16rem] leading-none select-none">R</div>
+        <div className="absolute -top-20 right-0 text-emerald-400/[0.04] font-black text-[16rem] leading-none select-none">R</div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <Reveal className="text-center mb-16">
-            <Stamp className="text-amber-700 border-amber-600/50 mb-5">Six seats, one table</Stamp>
-            <h2 className="font-display text-4xl md:text-5xl font-bold text-slate-900 tracking-tight">
-              BUILT FOR <span className="text-amber-600">EVERY</span> TEAM MEMBER.
+            <Stamp className="text-brand-400 border-brand-400/60 mb-5">Six seats, one table</Stamp>
+            <h2 className="font-display text-4xl md:text-5xl font-bold text-white tracking-tight">
+              BUILT FOR <span className="text-emerald-400">EVERY</span> TEAM MEMBER.
             </h2>
-            <p className="text-slate-600 text-lg max-w-2xl mx-auto mt-5">
+            <p className="text-slate-400 text-lg max-w-2xl mx-auto mt-5">
               Six distinct roles ensure each person sees and does exactly what their job requires — nothing more, nothing less.
             </p>
           </Reveal>
@@ -562,18 +562,18 @@ const LandingPage = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {roles.map((role, i) => (
               <Reveal key={i} delay={(i % 3) * 90}>
-                <div className="group relative h-full border-2 border-slate-200 bg-white p-6 overflow-hidden transition-all duration-300 hover:-translate-y-1.5 hover:border-slate-300 hover:shadow-lg">
-                  <div className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${role.bar} opacity-80 group-hover:opacity-100 transition-opacity`} />
+                <div className="group relative h-full border-2 border-white/10 bg-[#0a0e0c] p-6 overflow-hidden transition-all duration-300 hover:-translate-y-1.5 hover:border-white/25 hover:shadow-lg">
+                  <div className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${role.bar} opacity-70 group-hover:opacity-100 transition-opacity`} />
                   <div className="flex items-start justify-between mb-6">
-                    <h3 className="font-display text-2xl font-bold text-slate-900">{role.name}</h3>
+                    <h3 className="font-display text-2xl font-bold text-white">{role.name}</h3>
                     <span className={`text-[10px] font-semibold px-3 py-1 whitespace-nowrap ${role.badge}`}>
                       {role.tagline}
                     </span>
                   </div>
                   <ul className="space-y-2.5">
                     {role.perms && role.perms.map((p, j) => (
-                      <li key={j} className="flex items-start gap-2.5 text-sm text-slate-600">
-                        <FaCheck className="text-amber-600 flex-shrink-0 w-3 h-3 mt-0.5" />
+                      <li key={j} className="flex items-start gap-2.5 text-sm text-slate-400">
+                        <FaCheck className="text-emerald-400 flex-shrink-0 w-3 h-3 mt-0.5" />
                         {p}
                       </li>
                     ))}
@@ -586,14 +586,14 @@ const LandingPage = () => {
       </section>
 
       {/* ── Usage guide ────────────────────────────────────── */}
-      <section id="guide" className="py-24 md:py-28 bg-white border-y border-slate-200">
+      <section id="guide" className="py-24 md:py-28 bg-[#0a0e0c] border-y border-emerald-400/10">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <Reveal className="text-center mb-16">
-            <Stamp className="text-amber-700 border-amber-600/50 mb-5">Read me</Stamp>
-            <h2 className="font-display text-4xl md:text-5xl font-bold text-slate-900 tracking-tight">
-              THE <span className="text-amber-600">WALKTHROUGH.</span>
+            <Stamp className="text-brand-400 border-brand-400/60 mb-5">Read me</Stamp>
+            <h2 className="font-display text-4xl md:text-5xl font-bold text-white tracking-tight">
+              THE <span className="text-emerald-400">WALKTHROUGH.</span>
             </h2>
-            <p className="text-slate-600 text-lg max-w-xl mx-auto mt-5">
+            <p className="text-slate-400 text-lg max-w-xl mx-auto mt-5">
               The most important workflows in the platform, explained in plain language.
             </p>
           </Reveal>
@@ -601,17 +601,17 @@ const LandingPage = () => {
           <div className="grid md:grid-cols-2 gap-5">
             {guide.map((section, i) => (
               <Reveal key={i} delay={(i % 2) * 100}>
-                <div className="h-full border-2 border-slate-200 bg-white p-6 hover:border-amber-500/60 transition-colors">
-                  <h3 className="flex items-center gap-3 font-display text-lg font-bold text-slate-900 mb-5">
-                    <span className="font-mono text-xs text-black bg-brand-400 font-bold w-8 h-8 flex items-center justify-center flex-shrink-0 shadow-[2px_2px_0_#d9770644]">
+                <div className="h-full border-2 border-white/10 bg-[#0a0e0c] p-6 hover:border-emerald-400/50 transition-colors">
+                  <h3 className="flex items-center gap-3 font-display text-lg font-bold text-white mb-5">
+                    <span className="font-mono text-xs text-black bg-emerald-400 font-bold w-8 h-8 flex items-center justify-center flex-shrink-0 shadow-[2px_2px_0_#34d39944]">
                       {String(i + 1).padStart(2, '0')}
                     </span>
                     {section.title}
                   </h3>
                   <ol className="space-y-2.5">
                     {section.steps.map((s, j) => (
-                      <li key={j} className="flex gap-2.5 text-sm text-slate-600 leading-relaxed">
-                        <span className="font-mono text-[10px] text-amber-600/80 pt-1 flex-shrink-0">{j + 1}.</span>
+                      <li key={j} className="flex gap-2.5 text-sm text-slate-400 leading-relaxed">
+                        <span className="font-mono text-[10px] text-emerald-400/80 pt-1 flex-shrink-0">{j + 1}.</span>
                         {s}
                       </li>
                     ))}
@@ -624,55 +624,55 @@ const LandingPage = () => {
       </section>
 
       {/* ── Final CTA ──────────────────────────────────────── */}
-      <section className="relative py-28 md:py-36 overflow-hidden bg-gradient-to-br from-brand-400 via-amber-400 to-amber-500">
+      <section className="relative py-28 md:py-36 overflow-hidden bg-gradient-to-br from-emerald-600 via-emerald-500 to-teal-600">
         <div className="absolute inset-0 pointer-events-none" style={{
           backgroundImage:
-            'radial-gradient(rgba(0,0,0,0.07) 1px, transparent 1px)',
+            'radial-gradient(rgba(0,0,0,0.18) 1px, transparent 1px)',
           backgroundSize: '26px 26px',
         }} />
         <div className="relative max-w-5xl mx-auto px-4 text-center">
           <Reveal>
-            <h2 className="font-display text-4xl md:text-7xl font-bold leading-[1.02] tracking-tight text-slate-900">
+            <h2 className="font-display text-4xl md:text-7xl font-bold leading-[1.02] tracking-tight text-black">
               MONEY TALKS.
-              <span className="block text-black mt-2">
+              <span className="block text-[#07110b] mt-2">
                 GIVE IT A LEDGER.
               </span>
             </h2>
-            <p className="text-slate-800/90 text-lg md:text-xl max-w-2xl mx-auto mt-7 font-medium">
+            <p className="text-emerald-50/90 text-lg md:text-xl max-w-2xl mx-auto mt-7 font-medium">
               Register your company and invite your team today. No credit card — just your mobile number.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center mt-10">
               <Link
                 to="/login"
-                className="inline-flex items-center justify-center gap-2.5 bg-slate-900 hover:bg-slate-800 text-white font-bold px-9 py-4 text-lg shadow-[5px_5px_0_rgba(0,0,0,0.25)] hover:shadow-[2px_2px_0_rgba(0,0,0,0.25)] hover:-translate-y-0.5 transition-all"
+                className="inline-flex items-center justify-center gap-2.5 bg-black hover:bg-[#10251a] text-emerald-300 font-bold px-9 py-4 text-lg shadow-[5px_5px_0_rgba(0,0,0,0.25)] hover:shadow-[2px_2px_0_rgba(0,0,0,0.25)] hover:-translate-y-0.5 transition-all"
               >
                 Get Started Now <FaArrowRight className="w-4 h-4" />
               </Link>
               <Link
                 to="/register"
-                className="inline-flex items-center justify-center gap-2.5 border-2 border-slate-900/70 hover:border-slate-900 text-slate-900 font-semibold px-9 py-4 text-lg transition-all"
+                className="inline-flex items-center justify-center gap-2.5 border-2 border-black/60 hover:border-black text-black font-semibold px-9 py-4 text-lg transition-all"
               >
                 Create Account
               </Link>
             </div>
             <div className="mt-10 flex items-center justify-center gap-4 flex-wrap">
-              <Stamp className="text-slate-800 border-slate-800/60 rotate-[-4deg]">No credit card</Stamp>
-              <Stamp className="text-emerald-800 border-emerald-800/60 rotate-[3deg]">Mobile number only</Stamp>
-              <Stamp className="text-slate-900 border-slate-900/60 rotate-[-2deg]">Setup in 30 sec</Stamp>
+              <Stamp className="text-black border-black/60 rotate-[-4deg]">No credit card</Stamp>
+              <Stamp className="text-[#06220f] border-[#06220f]/70 rotate-[3deg]">Mobile number only</Stamp>
+              <Stamp className="text-black border-black/60 rotate-[-2deg]">Setup in 30 sec</Stamp>
             </div>
           </Reveal>
         </div>
       </section>
 
       {/* ── Footer ─────────────────────────────────────────── */}
-      <footer className="border-t border-slate-200 bg-[#f7f5f0] pt-16 pb-10">
+      <footer className="border-t border-emerald-400/10 bg-[#050806] pt-16 pb-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-8 mb-12">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-brand-400 text-black flex items-center justify-center font-black text-xl">₹</div>
+              <div className="w-10 h-10 bg-emerald-400 text-black flex items-center justify-center font-black text-xl">₹</div>
               <div className="leading-none">
-                <span className="block font-display text-xl font-bold text-slate-900">FinanceFlow</span>
-                <span className="block font-mono text-[9px] tracking-[0.35em] text-brand-600/90 uppercase">Company Ledger</span>
+                <span className="block font-display text-xl font-bold text-white">FinanceFlow</span>
+                <span className="block font-mono text-[9px] tracking-[0.35em] text-emerald-300/90 uppercase">Company Ledger</span>
               </div>
             </div>
             <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-slate-500 text-center">
@@ -680,14 +680,14 @@ const LandingPage = () => {
             </p>
           </div>
 
-          <div className="border-t border-slate-200 pt-8 flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="border-t border-emerald-400/10 pt-8 flex flex-col md:flex-row items-center justify-between gap-6">
             <p className="text-sm text-slate-500">
               © {new Date().getFullYear()} FinanceFlow. Company finance management made simple.
             </p>
             <div className="flex gap-8 text-sm">
-              <Link to="/login" className="text-slate-600 hover:text-amber-700 transition-colors">Sign In</Link>
-              <Link to="/register" className="text-slate-600 hover:text-amber-700 transition-colors">Register</Link>
-              <a href="#features" className="text-slate-600 hover:text-amber-700 transition-colors">Modules</a>
+              <Link to="/login" className="text-slate-400 hover:text-emerald-300 transition-colors">Sign In</Link>
+              <Link to="/register" className="text-slate-400 hover:text-emerald-300 transition-colors">Register</Link>
+              <a href="#features" className="text-slate-400 hover:text-emerald-300 transition-colors">Modules</a>
             </div>
           </div>
         </div>

@@ -499,7 +499,7 @@ const AdminDashboard = () => {
                     <div className="flex items-center gap-2 mt-0.5">
                       <span className="text-xs text-slate-400">{new Date(tx.date).toLocaleDateString('en-IN')}</span>
                       {tx.category && (
-                        <span className="text-[10px] px-1.5 py-0.5 bg-slate-100 rounded text-slate-500">{tx.category}</span>
+                        <span className="text-[10px] px-1.5 py-0.5 bg-emerald-50 rounded text-emerald-700">{tx.category}</span>
                       )}
                     </div>
                   </div>

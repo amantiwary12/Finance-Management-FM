@@ -91,10 +91,11 @@ const Dashboard = () => {
   return (
     <div className="space-y-5">
       {/* Greeting banner */}
-      <div className="bg-gradient-to-r from-slate-900 via-blue-950 to-indigo-950 rounded-xl p-5 sm:p-6 text-white relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-48 h-48 bg-blue-500/10 rounded-full blur-3xl translate-x-1/3 -translate-y-1/3 pointer-events-none" />
+      <div className="bg-[#08130d] rounded-xl p-5 sm:p-6 text-white relative overflow-hidden border border-emerald-400/20">
+        <div className="absolute top-0 right-0 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl translate-x-1/3 -translate-y-1/3 pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-40 h-40 bg-brand-400/10 rounded-full blur-3xl -translate-x-1/3 translate-y-1/3 pointer-events-none" />
         <div className="relative">
-          <p className="text-blue-300 text-sm font-medium mb-1">
+          <p className="text-brand-300 text-sm font-medium mb-1">
             {greeting()}, {user?.name?.split(" ")[0]}
           </p>
           <h2 className="text-xl sm:text-2xl font-bold">Here's your financial overview</h2>
